@@ -1,5 +1,6 @@
 import { ButtonHTMLAttributes, ReactNode } from "react";
 import { IconType } from "react-icons";
+import { useDarkMode } from "@/contexts/DarkModeContext";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "social";
@@ -16,16 +17,21 @@ const Button = ({
   className = "",
   ...props
 }: ButtonProps) => {
+  const { isDarkMode } = useDarkMode();
+
   const baseStyles =
-    "w-full flex justify-center items-center py-3 px-4 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+    "w-full flex justify-center items-center py-3 px-4 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variants = {
-    primary:
-      "bg-blue-600 hover:bg-blue-700 text-white focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
-    secondary:
-      "border border-gray-700 bg-gray-700/50 hover:bg-gray-700 text-white",
-    social:
-      "border border-gray-700 bg-gray-700/50 hover:bg-gray-700 text-white py-2.5",
+    primary: `bg-blue-600 hover:bg-blue-700 text-white focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+      isDarkMode ? "focus:ring-offset-gray-900" : "focus:ring-offset-white"
+    }`,
+    secondary: isDarkMode
+      ? "border border-gray-700 bg-gray-700/50 hover:bg-gray-700 text-white"
+      : "border border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-700",
+    social: isDarkMode
+      ? "border border-gray-700 bg-gray-700/50 hover:bg-gray-700 text-white py-2.5"
+      : "border border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5",
   };
 
   return (
@@ -36,7 +42,7 @@ const Button = ({
     >
       {isLoading ? (
         <svg
-          className="animate-spin h-5 w-5 text-white"
+          className="animate-spin h-5 w-5 text-current"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"

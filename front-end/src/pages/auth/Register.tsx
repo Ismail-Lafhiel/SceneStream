@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FaEnvelope,
   FaLock,
@@ -14,6 +14,8 @@ import toast from "react-hot-toast";
 import TextInput from "@/components/ui/TextInput";
 import Checkbox from "@/components/ui/Checkbox";
 import Button from "@/components/ui/Button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useDarkMode } from "@/contexts/DarkModeContext";
 
 // Form validation schema
 const registerSchema = z
@@ -51,6 +53,9 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { signUp } = useAuth();
+  const { isDarkMode } = useDarkMode();
 
   const {
     register,
@@ -71,37 +76,54 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call
-      console.log("Form submitted:", data);
+      await signUp(data.email, data.password, data.fullName);
+      navigate("/confirm-email", { state: { email: data.email } });
       toast.success(
-        "Registration successful! Please check your email to verify your account."
+        "Registration successful! Please check your email for the verification code."
       );
-    } catch (err) {
-      toast.error("Registration failed. Please try again.");
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast.error(error.message || "Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSocialRegister = (provider: "google" | "facebook") => {
-    toast.promise(
-      // Replace this with your actual social registration logic
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: `Connecting to ${provider}...`,
-        success: `Successfully connected with ${provider}!`,
-        error: `Could not connect to ${provider}`,
-      }
-    );
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 1500)), {
+      loading: `Connecting to ${provider}...`,
+      success: `Successfully connected with ${provider}!`,
+      error: `Could not connect to ${provider}`,
+    });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 mt-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-gray-800 p-8 rounded-xl shadow-2xl">
+    <div
+      className={`min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors ${
+        isDarkMode ? "bg-gray-900" : "bg-gray-50"
+      }`}
+    >
+      <div
+        className={`max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl transition-colors ${
+          isDarkMode ? "bg-gray-800" : "bg-white"
+        }`}
+      >
         {/* Logo and Title */}
         <div className="text-center">
-          <h2 className="text-4xl font-bold text-white mb-2">Create Account</h2>
-          <p className="text-gray-400">Join SceneStream today</p>
+          <h2
+            className={`text-4xl font-bold mb-2 transition-colors ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            Create Account
+          </h2>
+          <p
+            className={`transition-colors ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
+            Join SceneStream today
+          </p>
         </div>
 
         {/* Register Form */}
@@ -149,7 +171,9 @@ const Register = () => {
               <Checkbox
                 id="acceptTerms"
                 label={
-                  <span>
+                  <span
+                    className={isDarkMode ? "text-gray-300" : "text-gray-700"}
+                  >
                     I agree to the{" "}
                     <Link
                       to="/terms"
@@ -179,10 +203,20 @@ const Register = () => {
           {/* Social Login Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-700"></div>
+              <div
+                className={`w-full border-t transition-colors ${
+                  isDarkMode ? "border-gray-700" : "border-gray-200"
+                }`}
+              ></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-800 text-gray-400">
+              <span
+                className={`px-2 transition-colors ${
+                  isDarkMode
+                    ? "bg-gray-800 text-gray-400"
+                    : "bg-white text-gray-500"
+                }`}
+              >
                 Or register with
               </span>
             </div>
@@ -211,7 +245,11 @@ const Register = () => {
 
         {/* Sign In Link */}
         <div className="text-center">
-          <p className="text-sm text-gray-400">
+          <p
+            className={`text-sm transition-colors ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             Already have an account?{" "}
             <Link
               to="/login"

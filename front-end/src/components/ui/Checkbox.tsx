@@ -1,4 +1,5 @@
 import { InputHTMLAttributes, forwardRef, ReactNode } from "react";
+import { useDarkMode } from "@/contexts/DarkModeContext";
 
 interface CheckboxProps extends InputHTMLAttributes<HTMLInputElement> {
   label: ReactNode;
@@ -7,6 +8,8 @@ interface CheckboxProps extends InputHTMLAttributes<HTMLInputElement> {
 
 const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
   ({ label, error, className = "", ...props }, ref) => {
+    const { isDarkMode } = useDarkMode();
+
     return (
       <div className="space-y-1">
         <div className="flex items-start">
@@ -19,9 +22,13 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
                 h-4 w-4
                 text-blue-600
                 focus:ring-blue-500
-                border-gray-700
                 rounded
-                bg-gray-700
+                transition-colors
+                ${
+                  isDarkMode
+                    ? "border-gray-700 bg-gray-700"
+                    : "border-gray-300 bg-white"
+                }
                 ${error ? "border-red-500" : ""}
                 ${className}
               `}
@@ -31,7 +38,13 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           <div className="ml-2">
             <label
               htmlFor={props.id}
-              className={`text-sm ${error ? "text-red-500" : "text-gray-300"}`}
+              className={`text-sm transition-colors ${
+                error
+                  ? "text-red-500"
+                  : isDarkMode
+                  ? "text-gray-300"
+                  : "text-gray-700"
+              }`}
             >
               {label}
             </label>

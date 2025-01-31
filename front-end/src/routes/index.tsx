@@ -6,6 +6,7 @@ import NotFound from "@/pages/notFound/NotFound";
 
 const routes: RouteObject[] = [
   {
+    path: "/",
     element: <Layout />,
     errorElement: <NotFound />,
     children: [
