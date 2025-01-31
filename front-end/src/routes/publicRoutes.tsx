@@ -4,6 +4,8 @@ import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import ConfirmEmail from "@/pages/auth/ConfirmEmail";
 import Home from "@/pages/home/Home";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+import ResetPassword from "@/pages/auth/ResetPassword";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -21,6 +23,14 @@ const publicRoutes: RouteObject[] = [
   {
     path: "/confirm-email",
     element: <ConfirmEmail />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
   },
 ];
 

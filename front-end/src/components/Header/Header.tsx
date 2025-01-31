@@ -7,7 +7,6 @@ import {
   FaBars,
   FaTimes,
   FaUser,
-  FaSignOutAlt,
 } from "react-icons/fa";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { useAuth } from "@/contexts/AuthContext";

@@ -86,7 +86,7 @@ const ConfirmEmail = () => {
 
       <div
         className={`relative z-10 max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl backdrop-blur-sm ${
-          isDarkMode ? "bg-gray-800/90" : "bg-white/90"
+          isDarkMode ? "bg-gray-800/90" : "bg-white"
         }`}
       >
         <div className="text-center">
