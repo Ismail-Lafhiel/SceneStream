@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import TextInput from "@/components/ui/TextInput";
 import Checkbox from "@/components/ui/Checkbox";
 import Button from "@/components/ui/Button";
+import { useDarkMode } from "@/contexts/DarkModeContext";
 
 // Form validation schema
 const loginSchema = z.object({
@@ -26,6 +27,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const { isDarkMode } = useDarkMode();
+
 
   const {
     register,
@@ -68,12 +71,41 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 mt-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-gray-800 p-8 rounded-xl shadow-2xl">
+    <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {/* Background Layer */}
+      <div className="absolute inset-0 z-0">
+        <div
+          className={`absolute inset-0 z-10 ${
+            isDarkMode
+              ? "bg-gradient-to-r from-blue-900/90 to-black/70"
+              : "bg-gradient-to-r from-blue-600/80 to-blue-800/80"
+          }`}
+        ></div>
+        <img
+          className="w-full h-full object-cover"
+          src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80"
+          alt="Background"
+        />
+      </div>
+
+      {/* Form Container */}
+      <div
+        className={`relative z-10 max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl backdrop-blur-sm ${
+          isDarkMode ? "bg-gray-800/90" : "bg-white/90"
+        }`}
+      >
         {/* Logo and Title */}
         <div className="text-center">
-          <h2 className="text-4xl font-bold text-white mb-2">Welcome Back</h2>
-          <p className="text-gray-400">Sign in to continue to SceneStream</p>
+          <h2
+            className={`text-4xl font-bold mb-2 ${
+              isDarkMode ? "text-white" : "text-gray-800"
+            }`}
+          >
+            Welcome Back
+          </h2>
+          <p className={`${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+            Sign in to continue to SceneStream
+          </p>
         </div>
 
         {/* Login Form */}
@@ -101,12 +133,18 @@ const Login = () => {
             <div className="flex items-center justify-between">
               <Checkbox
                 id="rememberMe"
-                label="Remember me"
+                label={
+                  <span
+                    className={isDarkMode ? "text-gray-300" : "text-gray-600"}
+                  >
+                    Remember me
+                  </span>
+                }
                 {...register("rememberMe")}
               />
               <Link
                 to="/forgot-password"
-                className="text-sm text-blue-500 hover:text-blue-400"
+                className="text-sm text-blue-400 hover:text-blue-300"
               >
                 Forgot password?
               </Link>
@@ -120,10 +158,20 @@ const Login = () => {
           {/* Social Login Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-700"></div>
+              <div
+                className={`w-full border-t ${
+                  isDarkMode ? "border-gray-700" : "border-gray-300"
+                }`}
+              ></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-800 text-gray-400">
+              <span
+                className={`px-2 ${
+                  isDarkMode
+                    ? "bg-gray-800/90 text-gray-400"
+                    : "bg-white/90 text-gray-500"
+                }`}
+              >
                 Or continue with
               </span>
             </div>
@@ -152,11 +200,15 @@ const Login = () => {
 
         {/* Sign Up Link */}
         <div className="text-center">
-          <p className="text-sm text-gray-400">
+          <p
+            className={`text-sm ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             Don't have an account?{" "}
             <Link
               to="/register"
-              className="font-medium text-blue-500 hover:text-blue-400"
+              className="font-medium text-blue-400 hover:text-blue-300"
             >
               Sign up now
             </Link>
