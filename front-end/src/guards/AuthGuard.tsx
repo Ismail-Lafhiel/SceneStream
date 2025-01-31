@@ -1,10 +1,10 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+// import { Navigate, Outlet } from "react-router-dom";
+// import { useAuth } from "@/contexts/AuthContext";
 
-const AuthGuard = () => {
-  const { isAuthenticated } = useAuth();
+// const AuthGuard = () => {
+//   const { isAuthenticated } = useAuth();
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
-};
+//   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+// };
 
-export default AuthGuard;
+// export default AuthGuard;
