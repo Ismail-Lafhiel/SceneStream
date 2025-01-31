@@ -1,16 +1,16 @@
-import LandingPage from "@/pages/Landing/LandingPage";
-// import LoginPage from "@/pages/Login/LoginPage";
-// import RegisterPage from "@/pages/Register/RegisterPage";
+import Login from "@/pages/auth/Login";
+import Home from "@/pages/landing/Home";
+
 
 const publicRoutes = [
   {
     path: "/",
-    element: <LandingPage />,
+    element: <Home />,
   },
-  // {
-  //   path: "/login",
-  //   element: <LoginPage />,
-  // },
+  {
+    path: "/login",
+    element: <Login />,
+  },
   // {
   //   path: "/register",
   //   element: <RegisterPage />,

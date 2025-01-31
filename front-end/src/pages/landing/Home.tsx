@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { FaPlay, FaTv, FaTablet, FaStar } from "react-icons/fa";
+import { FaPlay, FaTv, FaTablet } from "react-icons/fa";
 import { BiMoviePlay } from "react-icons/bi";
-import Features from "@/components/Features/Features";
+import Features from "@/components/features/Features";
 
-const LandingPage = () => {
+const Home = () => {
   return (
     <>
       {/* Hero Section */}
@@ -105,4 +105,4 @@ const FeatureCard = ({
   );
 };
 
-export default LandingPage;
+export default Home;
