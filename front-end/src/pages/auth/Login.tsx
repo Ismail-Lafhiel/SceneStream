@@ -4,6 +4,7 @@ import { FaEnvelope, FaLock, FaGoogle, FaFacebookF } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import toast from "react-hot-toast";
 import TextInput from "@/components/ui/TextInput";
 import Checkbox from "@/components/ui/Checkbox";
 import Button from "@/components/ui/Button";
@@ -25,7 +26,6 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [serverError, setServerError] = useState("");
 
   const {
     register,
@@ -41,35 +41,40 @@ const Login = () => {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    setServerError("");
     setIsLoading(true);
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call
       console.log("Form submitted:", data);
+      toast.success("Successfully logged in!");
       // Add your login logic here
     } catch (err) {
-      setServerError("Invalid email or password");
+      toast.error("Invalid email or password");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleSocialLogin = (provider: "google" | "facebook") => {
+    toast.promise(
+      // Replace this with your actual social login logic
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: `Connecting to ${provider}...`,
+        success: `Successfully connected with ${provider}!`,
+        error: `Could not connect to ${provider}`,
+      }
+    );
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 mt-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-gray-800 p-8 rounded-xl shadow-2xl">
         {/* Logo and Title */}
         <div className="text-center">
           <h2 className="text-4xl font-bold text-white mb-2">Welcome Back</h2>
           <p className="text-gray-400">Sign in to continue to SceneStream</p>
         </div>
-
-        {/* Server Error Message */}
-        {serverError && (
-          <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded relative">
-            {serverError}
-          </div>
-        )}
 
         {/* Login Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -130,7 +135,7 @@ const Login = () => {
               type="button"
               variant="social"
               icon={FaGoogle}
-              onClick={() => console.log("Google sign in")}
+              onClick={() => handleSocialLogin("google")}
             >
               Google
             </Button>
@@ -138,7 +143,7 @@ const Login = () => {
               type="button"
               variant="social"
               icon={FaFacebookF}
-              onClick={() => console.log("Facebook sign in")}
+              onClick={() => handleSocialLogin("facebook")}
             >
               Facebook
             </Button>
