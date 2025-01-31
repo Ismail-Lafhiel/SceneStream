@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaGoogle, FaFacebookF } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -9,6 +9,7 @@ import TextInput from "@/components/ui/TextInput";
 import Checkbox from "@/components/ui/Checkbox";
 import Button from "@/components/ui/Button";
 import { useDarkMode } from "@/contexts/DarkModeContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Form validation schema
 const loginSchema = z.object({
@@ -28,7 +29,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { isDarkMode } = useDarkMode();
-
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -47,27 +49,44 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call
-      console.log("Form submitted:", data);
-      toast.success("Successfully logged in!");
-      // Add your login logic here
-    } catch (err) {
-      toast.error("Invalid email or password");
+      const result = await signIn(data.email, data.password);
+
+      if (result.isSignedIn) {
+        toast.success("Successfully logged in!");
+        navigate("/");
+      } else if (result.nextStep?.signInStep === "CONFIRM_SIGN_UP") {
+        navigate("/verify-email", { state: { email: data.email } });
+      } else {
+        toast.error("Additional verification required");
+      }
+    } catch (err: any) {
+      switch (err.name) {
+        case "UserNotFoundException":
+          toast.error("Account not found. Please check your email.");
+          break;
+        case "NotAuthorizedException":
+          toast.error("Incorrect email or password");
+          break;
+        case "UserNotConfirmedException":
+          toast.error("Please verify your email first");
+          navigate("/verify-email", { state: { email: data.email } });
+          break;
+        default:
+          toast.error(err.message || "Failed to sign in");
+      }
+      console.error("Login error:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSocialLogin = (provider: "google" | "facebook") => {
-    toast.promise(
-      // Replace this with your actual social login logic
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: `Connecting to ${provider}...`,
-        success: `Successfully connected with ${provider}!`,
-        error: `Could not connect to ${provider}`,
-      }
-    );
+  const handleSocialLogin = async (provider: "google" | "facebook") => {
+    // You can implement social sign-in later when needed
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 1500)), {
+      loading: `Connecting to ${provider}...`,
+      success: `Successfully connected with ${provider}!`,
+      error: `Could not connect to ${provider}`,
+    });
   };
 
   return (

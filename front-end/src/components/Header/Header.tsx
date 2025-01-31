@@ -1,5 +1,4 @@
-// src/components/Header.tsx
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FaPlay,
   FaSearch,
@@ -7,15 +6,34 @@ import {
   FaMoon,
   FaBars,
   FaTimes,
+  FaUser,
+  FaSignOutAlt,
 } from "react-icons/fa";
 import { useDarkMode } from "@/contexts/DarkModeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const Header = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const { isAuthenticated, user, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleProfileMenu = () => setIsProfileMenuOpen(!isProfileMenuOpen);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setIsProfileMenuOpen(false);
+      navigate("/login");
+      toast.success("Successfully logged out!");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   return (
     <nav
@@ -56,23 +74,81 @@ const Header = () => {
               />
             </div>
 
-            <Link
-              to="/login"
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                isDarkMode
-                  ? "text-gray-300 hover:text-white"
-                  : "text-gray-700 hover:text-gray-900"
-              }`}
-            >
-              Sign In
-            </Link>
+            {isAuthenticated ? (
+              <div className="relative">
+                <button
+                  onClick={toggleProfileMenu}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+                    isDarkMode
+                      ? "text-gray-300 hover:text-white"
+                      : "text-gray-700 hover:text-gray-900"
+                  }`}
+                >
+                  <FaUser className="h-5 w-5" />
+                  <span>{user?.attributes?.name || "User"}</span>
+                </button>
 
-            <Link
-              to="/register"
-              className="bg-blue-600 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors shadow-lg hover:shadow-blue-500/25"
-            >
-              Start Free Trial
-            </Link>
+                {/* Profile Dropdown */}
+                {isProfileMenuOpen && (
+                  <div
+                    className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 ${
+                      isDarkMode ? "bg-gray-800" : "bg-white"
+                    }`}
+                  >
+                    <Link
+                      to="/profile"
+                      className={`block px-4 py-2 text-sm ${
+                        isDarkMode
+                          ? "text-gray-300 hover:bg-gray-700"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      Your Profile
+                    </Link>
+                    <Link
+                      to="/settings"
+                      className={`block px-4 py-2 text-sm ${
+                        isDarkMode
+                          ? "text-gray-300 hover:bg-gray-700"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      Settings
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className={`block w-full text-left px-4 py-2 text-sm cursor-pointer ${
+                        isDarkMode
+                          ? "text-gray-300 hover:bg-gray-700"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isDarkMode
+                      ? "text-gray-300 hover:text-white"
+                      : "text-gray-700 hover:text-gray-900"
+                  }`}
+                >
+                  Sign In
+                </Link>
+
+                <Link
+                  to="/register"
+                  className="bg-blue-600 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors shadow-lg hover:shadow-blue-500/25"
+                >
+                  Start Free Trial
+                </Link>
+              </>
+            )}
 
             <button
               onClick={toggleDarkMode}
@@ -87,6 +163,16 @@ const Header = () => {
 
           {/* Mobile Navigation Button */}
           <div className="flex items-center space-x-4 md:hidden">
+            {isAuthenticated && (
+              <button
+                onClick={toggleProfileMenu}
+                className={`p-2 rounded-full ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                <FaUser size={20} />
+              </button>
+            )}
             <button
               onClick={toggleDarkMode}
               className={`p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors ${
@@ -130,25 +216,66 @@ const Header = () => {
               />
             </div>
 
-            <Link
-              to="/login"
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                isDarkMode
-                  ? "text-gray-300 hover:text-white hover:bg-gray-800"
-                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Sign In
-            </Link>
-
-            <Link
-              to="/register"
-              className="block w-full text-center bg-blue-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Start Free Trial
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to="/profile"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                    isDarkMode
+                      ? "text-gray-300 hover:text-white hover:bg-gray-700"
+                      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Your Profile
+                </Link>
+                <Link
+                  to="/settings"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                    isDarkMode
+                      ? "text-gray-300 hover:text-white hover:bg-gray-700"
+                      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Settings
+                </Link>
+                <button
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMenuOpen(false);
+                  }}
+                  className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${
+                    isDarkMode
+                      ? "text-gray-300 hover:text-white hover:bg-gray-700"
+                      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                    isDarkMode
+                      ? "text-gray-300 hover:text-white hover:bg-gray-700"
+                      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  className="block w-full text-center bg-blue-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Start Free Trial
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
