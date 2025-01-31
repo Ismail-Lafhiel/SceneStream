@@ -1,6 +1,6 @@
 // src/pages/auth/ResetPassword.tsx
 import { useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

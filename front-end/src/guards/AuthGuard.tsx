@@ -1,10 +1,16 @@
-// import { Navigate, Outlet } from "react-router-dom";
-// import { useAuth } from "@/contexts/AuthContext";
+// src/guards/AuthGuard.tsx
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
-// const AuthGuard = () => {
-//   const { isAuthenticated } = useAuth();
+const AuthGuard = () => {
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
 
-//   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
-// };
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
-// export default AuthGuard;
+  return <Outlet />;
+};
+
+export default AuthGuard;
