@@ -6,7 +6,7 @@ import ConfirmEmail from "@/pages/auth/ConfirmEmail";
 import Home from "@/pages/home/Home";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
-import GuestGuard from "@/guards/AuthGuard";
+import UnauthGuard from "@/guards/UnauthGuard";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -14,7 +14,7 @@ const publicRoutes: RouteObject[] = [
     element: <Home />,
   },
   {
-    element: <GuestGuard />,
+    element: <UnauthGuard />,
     children: [
       {
         path: "/login",

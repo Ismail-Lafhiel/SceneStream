@@ -1,9 +1,8 @@
-// src/router.tsx
 import { createBrowserRouter, Navigate, RouteObject } from "react-router-dom";
 import publicRoutes from "@/routes/publicRoutes";
-import privateRoutes from "@/routes/privateRoutes";
 import Layout from "@/components/layout/Layout";
 import NotFound from "@/pages/notFound/NotFound";
+import privateRoutes from "@/routes/privateRoutes";
 
 const routes: RouteObject[] = [
   {
@@ -15,7 +14,7 @@ const routes: RouteObject[] = [
       ...privateRoutes,
       {
         path: "*",
-        element: <Navigate to="/404" replace />,
+        element: <Navigate to="/login" replace />,
       },
     ],
   },

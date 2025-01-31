@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaGoogle, FaFacebookF } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -31,11 +31,13 @@ const Login = () => {
   const { isDarkMode } = useDarkMode();
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -46,33 +48,55 @@ const Login = () => {
   });
 
   const onSubmit = async (data: LoginFormData) => {
+    if (isLoading) return;
     setIsLoading(true);
 
     try {
       const result = await signIn(data.email, data.password);
 
-      if (result.isSignedIn) {
+      // If we get back a user object, the sign in was successful
+      if (result && "username" in result) {
         toast.success("Successfully logged in!");
-        navigate("/");
-      } else if (result.nextStep?.signInStep === "CONFIRM_SIGN_UP") {
-        navigate("/verify-email", { state: { email: data.email } });
-      } else {
-        toast.error("Additional verification required");
+        // Redirect to the intended destination or home
+        const from = location.state?.from?.pathname || "/";
+        navigate(from, { replace: true });
+        return;
+      }
+
+      // Handle different authentication steps if needed
+      if (result?.signInStep === "CONFIRM_SIGN_UP") {
+        navigate("/verify-email", {
+          state: { email: data.email },
+          replace: true,
+        });
       }
     } catch (err: any) {
+      // Handle specific error cases
       switch (err.name) {
         case "UserNotFoundException":
-          toast.error("Account not found. Please check your email.");
+          setError("email", {
+            type: "manual",
+            message: "Account not found. Please check your email.",
+          });
           break;
         case "NotAuthorizedException":
-          toast.error("Incorrect email or password");
+          setError("password", {
+            type: "manual",
+            message: "Incorrect password",
+          });
           break;
         case "UserNotConfirmedException":
           toast.error("Please verify your email first");
-          navigate("/verify-email", { state: { email: data.email } });
+          navigate("/verify-email", {
+            state: { email: data.email },
+            replace: true,
+          });
+          break;
+        case "LimitExceededException":
+          toast.error("Too many attempts. Please try again later.");
           break;
         default:
-          toast.error(err.message || "Failed to sign in");
+          toast.error(err.message || "An unexpected error occurred");
       }
       console.error("Login error:", err);
     } finally {
