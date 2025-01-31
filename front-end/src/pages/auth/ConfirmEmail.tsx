@@ -49,7 +49,9 @@ const ConfirmEmail = () => {
       navigate("/login");
     } catch (error: any) {
       console.error("Confirmation error:", error);
-      toast.error(error.message || "Code verification failed. Please try again.");
+      toast.error(
+        error.message || "Code verification failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -66,47 +68,52 @@ const ConfirmEmail = () => {
   };
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors ${
-        isDarkMode ? "bg-gray-900" : "bg-gray-50"
-      }`}
-    >
+    <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="absolute inset-0 z-0">
+        <div
+          className={`absolute inset-0 z-10 ${
+            isDarkMode
+              ? "bg-gradient-to-r from-blue-900/90 to-black/70"
+              : "bg-gradient-to-r from-blue-600/80 to-blue-800/80"
+          }`}
+        ></div>
+        <img
+          className="w-full h-full object-cover"
+          src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80"
+          alt="Background"
+        />
+      </div>
+
       <div
-        className={`max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl transition-colors ${
-          isDarkMode ? "bg-gray-800" : "bg-white"
+        className={`relative z-10 max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl backdrop-blur-sm ${
+          isDarkMode ? "bg-gray-800/90" : "bg-white/90"
         }`}
       >
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <div
-              className={`p-4 rounded-full transition-colors ${
+              className={`p-4 rounded-full ${
                 isDarkMode ? "bg-blue-500/10" : "bg-blue-50"
               }`}
             >
               <FaEnvelope
-                className={`h-8 w-8 transition-colors ${
-                  isDarkMode ? "text-blue-500" : "text-blue-600"
+                className={`h-8 w-8 ${
+                  isDarkMode ? "text-blue-400" : "text-blue-600"
                 }`}
               />
             </div>
           </div>
           <h2
-            className={`text-4xl font-bold mb-2 transition-colors ${
+            className={`text-4xl font-bold mb-2 ${
               isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
             Verify Your Email
           </h2>
-          <p
-            className={`transition-colors ${
-              isDarkMode ? "text-gray-400" : "text-gray-600"
-            }`}
-          >
+          <p className={`${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
             We've sent a verification code to{" "}
             <span
-              className={`transition-colors ${
-                isDarkMode ? "text-blue-400" : "text-blue-600"
-              }`}
+              className={`${isDarkMode ? "text-blue-400" : "text-blue-600"}`}
             >
               {email}
             </span>
@@ -122,24 +129,20 @@ const ConfirmEmail = () => {
             {...register("code")}
           />
 
-          <Button type="submit" isLoading={isLoading} className="w-full">
+          <Button type="submit" isLoading={isLoading} className="w-full cursor-pointer">
             Verify Email
           </Button>
 
           <div className="text-center space-y-4">
-            <p
-              className={`transition-colors ${
-                isDarkMode ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
+            <p className={`${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
               Didn't receive the code?
             </p>
             <button
               type="button"
               onClick={handleResendCode}
-              className={`text-sm font-medium transition-colors ${
+              className={`text-sm font-medium cursor-pointer ${
                 isDarkMode
-                  ? "text-blue-500 hover:text-blue-400"
+                  ? "text-blue-400 hover:text-blue-300"
                   : "text-blue-600 hover:text-blue-500"
               }`}
             >

@@ -98,30 +98,38 @@ const Register = () => {
   };
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors ${
-        isDarkMode ? "bg-gray-900" : "bg-gray-50"
-      }`}
-    >
+    <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {/* Background Layer */}
+      <div className="absolute inset-0 z-0">
+        <div
+          className={`absolute inset-0 z-10 ${
+            isDarkMode
+              ? "bg-gradient-to-r from-blue-900/90 to-black/70"
+              : "bg-gradient-to-r from-blue-600/80 to-blue-800/80"
+          }`}
+        ></div>
+        <img
+          className="w-full h-full object-cover"
+          src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80"
+          alt="Background"
+        />
+      </div>
+
+      {/* Form Container */}
       <div
-        className={`max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl transition-colors ${
-          isDarkMode ? "bg-gray-800" : "bg-white"
+        className={`relative z-10 max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl backdrop-blur-sm ${
+          isDarkMode ? "bg-gray-800/90" : "bg-white"
         }`}
       >
-        {/* Logo and Title */}
         <div className="text-center">
           <h2
-            className={`text-4xl font-bold mb-2 transition-colors ${
-              isDarkMode ? "text-white" : "text-gray-900"
+            className={`text-4xl font-bold mb-2 ${
+              isDarkMode ? "text-white" : "text-gray-800"
             }`}
           >
             Create Account
           </h2>
-          <p
-            className={`transition-colors ${
-              isDarkMode ? "text-gray-400" : "text-gray-600"
-            }`}
-          >
+          <p className={`${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
             Join SceneStream today
           </p>
         </div>
@@ -172,19 +180,19 @@ const Register = () => {
                 id="acceptTerms"
                 label={
                   <span
-                    className={isDarkMode ? "text-gray-300" : "text-gray-700"}
+                    className={isDarkMode ? "text-gray-300" : "text-gray-600"}
                   >
                     I agree to the{" "}
                     <Link
                       to="/terms"
-                      className="text-blue-500 hover:text-blue-400"
+                      className="text-blue-400 hover:text-blue-300"
                     >
                       Terms of Service
                     </Link>{" "}
                     and{" "}
                     <Link
                       to="/privacy"
-                      className="text-blue-500 hover:text-blue-400"
+                      className="text-blue-400 hover:text-blue-300"
                     >
                       Privacy Policy
                     </Link>
@@ -196,7 +204,7 @@ const Register = () => {
             </div>
           </div>
 
-          <Button type="submit" isLoading={isLoading}>
+          <Button type="submit" className="cursor-pointer" isLoading={isLoading}>
             Create Account
           </Button>
 
@@ -204,17 +212,17 @@ const Register = () => {
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div
-                className={`w-full border-t transition-colors ${
-                  isDarkMode ? "border-gray-700" : "border-gray-200"
+                className={`w-full border-t ${
+                  isDarkMode ? "border-gray-700" : "border-gray-300"
                 }`}
               ></div>
             </div>
             <div className="relative flex justify-center text-sm">
               <span
-                className={`px-2 transition-colors ${
+                className={`px-2 ${
                   isDarkMode
-                    ? "bg-gray-800 text-gray-400"
-                    : "bg-white text-gray-500"
+                    ? "bg-gray-800/90 text-gray-400"
+                    : "bg-white/90 text-gray-500"
                 }`}
               >
                 Or register with
@@ -225,6 +233,7 @@ const Register = () => {
           {/* Social Login Buttons */}
           <div className="grid grid-cols-2 gap-3">
             <Button
+              className="cursor-pointer"
               type="button"
               variant="social"
               icon={FaGoogle}
@@ -233,6 +242,7 @@ const Register = () => {
               Google
             </Button>
             <Button
+              className="cursor-pointer"
               type="button"
               variant="social"
               icon={FaFacebookF}
@@ -246,14 +256,14 @@ const Register = () => {
         {/* Sign In Link */}
         <div className="text-center">
           <p
-            className={`text-sm transition-colors ${
+            className={`text-sm ${
               isDarkMode ? "text-gray-400" : "text-gray-600"
             }`}
           >
             Already have an account?{" "}
             <Link
               to="/login"
-              className="font-medium text-blue-500 hover:text-blue-400"
+              className="font-medium text-blue-400 hover:text-blue-300"
             >
               Sign in
             </Link>
