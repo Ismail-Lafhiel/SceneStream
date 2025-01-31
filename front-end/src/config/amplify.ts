@@ -1,23 +1,42 @@
+// src/config/amplify.ts
 import { Amplify } from "aws-amplify";
-import { type ResourcesConfig } from "aws-amplify";
 
-const amplifyConfig: ResourcesConfig = {
+const region = import.meta.env.VITE_AWS_REGION;
+const userPoolId = import.meta.env.VITE_USER_POOL_ID;
+const userPoolClientId = import.meta.env.VITE_USER_POOL_CLIENT_ID;
+const bucket = import.meta.env.VITE_S3_BUCKET;
+
+// Log configuration for debugging
+console.log("Loading Amplify Configuration:", {
+  region,
+  userPoolId: userPoolId ? "configured" : "missing",
+  userPoolClientId: userPoolClientId ? "configured" : "missing",
+  bucket: bucket ? "configured" : "missing",
+});
+
+const amplifyConfig = {
   Auth: {
     Cognito: {
-      // @ts-ignore
-      region: import.meta.env.VITE_AWS_REGION,
-      userPoolId: import.meta.env.VITE_USER_POOL_ID,
-      userPoolClientId: import.meta.env.VITE_USER_POOL_CLIENT_ID,
-      signUpVerificationMethod: "code" as const, // explicitly type as literal
-      loginWith: {
-        email: true,
-        phone: false,
-        username: false,
-      },
+      userPoolId,
+      userPoolClientId,
+      region,
     },
   },
+  Storage: bucket
+    ? {
+        S3: {
+          bucket,
+          region,
+        },
+      }
+    : undefined,
 };
 
-Amplify.configure(amplifyConfig);
+try {
+  Amplify.configure(amplifyConfig);
+  console.log("✅ Amplify configured successfully");
+} catch (error) {
+  console.error("❌ Error configuring Amplify:", error);
+}
 
 export default Amplify;

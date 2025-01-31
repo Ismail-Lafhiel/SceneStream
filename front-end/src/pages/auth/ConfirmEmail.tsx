@@ -1,4 +1,3 @@
-// src/pages/auth/ConfirmEmail.tsx
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaEnvelope } from "react-icons/fa";
@@ -9,6 +8,7 @@ import toast from "react-hot-toast";
 import TextInput from "@/components/ui/TextInput";
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDarkMode } from "@/contexts/DarkModeContext";
 
 const confirmEmailSchema = z.object({
   code: z.string().min(1, "Verification code is required"),
@@ -21,6 +21,7 @@ const ConfirmEmail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { confirmSignUp, resendConfirmationCode } = useAuth();
+  const { isDarkMode } = useDarkMode();
 
   // Get email from location state
   const email = location.state?.email;
@@ -48,9 +49,7 @@ const ConfirmEmail = () => {
       navigate("/login");
     } catch (error: any) {
       console.error("Confirmation error:", error);
-      toast.error(
-        error.message || "Code verification failed. Please try again."
-      );
+      toast.error(error.message || "Code verification failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -67,20 +66,50 @@ const ConfirmEmail = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-gray-800 p-8 rounded-xl shadow-2xl">
+    <div
+      className={`min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors ${
+        isDarkMode ? "bg-gray-900" : "bg-gray-50"
+      }`}
+    >
+      <div
+        className={`max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl transition-colors ${
+          isDarkMode ? "bg-gray-800" : "bg-white"
+        }`}
+      >
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="p-4 bg-blue-500/10 rounded-full">
-              <FaEnvelope className="h-8 w-8 text-blue-500" />
+            <div
+              className={`p-4 rounded-full transition-colors ${
+                isDarkMode ? "bg-blue-500/10" : "bg-blue-50"
+              }`}
+            >
+              <FaEnvelope
+                className={`h-8 w-8 transition-colors ${
+                  isDarkMode ? "text-blue-500" : "text-blue-600"
+                }`}
+              />
             </div>
           </div>
-          <h2 className="text-4xl font-bold text-white mb-2">
+          <h2
+            className={`text-4xl font-bold mb-2 transition-colors ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             Verify Your Email
           </h2>
-          <p className="text-gray-400">
+          <p
+            className={`transition-colors ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             We've sent a verification code to{" "}
-            <span className="text-blue-400">{email}</span>
+            <span
+              className={`transition-colors ${
+                isDarkMode ? "text-blue-400" : "text-blue-600"
+              }`}
+            >
+              {email}
+            </span>
           </p>
         </div>
 
@@ -98,11 +127,21 @@ const ConfirmEmail = () => {
           </Button>
 
           <div className="text-center space-y-4">
-            <p className="text-gray-400">Didn't receive the code?</p>
+            <p
+              className={`transition-colors ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
+              Didn't receive the code?
+            </p>
             <button
               type="button"
               onClick={handleResendCode}
-              className="text-blue-500 hover:text-blue-400 text-sm font-medium"
+              className={`text-sm font-medium transition-colors ${
+                isDarkMode
+                  ? "text-blue-500 hover:text-blue-400"
+                  : "text-blue-600 hover:text-blue-500"
+              }`}
             >
               Resend verification code
             </button>
