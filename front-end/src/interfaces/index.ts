@@ -6,3 +6,4 @@ export * from "@/interfaces/video.interface";
 export * from "@/interfaces/credit.interface";
 export * from "@/interfaces/movie-details.interface";
 export * from "@/interfaces/movies-section.interface";
+export * from "@/interfaces/browse.interface";

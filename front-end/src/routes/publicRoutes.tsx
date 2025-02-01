@@ -12,11 +12,16 @@ import NotFound from "@/pages/error/NotFound";
 import Movies from "@/pages/movie/Movies";
 import TvShows from "@/pages/tv/TvShows";
 import TvShowDetails from "@/pages/tv/TvShowDetails";
+import Browse from "@/pages/browse/Browse";
 
 const publicRoutes: RouteObject[] = [
   {
     path: "/",
     element: <Home />,
+  },
+  {
+    path: "/browse",
+    element: <Browse />,
   },
   {
     path: "/movies",

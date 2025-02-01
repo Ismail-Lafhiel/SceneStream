@@ -8,6 +8,13 @@ import {
 } from "@/interfaces";
 import { TVShowDetails } from "@/interfaces/utility.interface";
 
+interface DiscoverParams {
+  page?: number;
+  with_genres?: number | null;
+  sort_by?: string;
+  search?: string;
+}
+
 const tmdbApi = axios.create({
   baseURL: "https://api.themoviedb.org/3",
   params: {
@@ -119,6 +126,23 @@ export const movieService = {
     const { data } = await tmdbApi.get(`/movie/${movieId}/videos`);
     return data;
   },
+  discoverMovies: async ({
+    page = 1,
+    with_genres,
+    sort_by = "popularity.desc",
+    search,
+  }: DiscoverParams): Promise<IPaginatedResponse<IMovie>> => {
+    const endpoint = search ? "/search/movie" : "/discover/movie";
+    const { data } = await tmdbApi.get(endpoint, {
+      params: {
+        page,
+        with_genres: with_genres || undefined,
+        sort_by,
+        query: search,
+      },
+    });
+    return data;
+  },
 };
 
 //tv show api calls
@@ -171,6 +195,23 @@ export const tvService = {
     tvId: number
   ): Promise<IPaginatedResponse<ITVShow>> => {
     const { data } = await tmdbApi.get(`/tv/${tvId}/similar`);
+    return data;
+  },
+  discoverTvShows: async ({
+    page = 1,
+    with_genres,
+    sort_by = "popularity.desc",
+    search,
+  }: DiscoverParams): Promise<IPaginatedResponse<ITVShow>> => {
+    const endpoint = search ? "/search/tv" : "/discover/tv";
+    const { data } = await tmdbApi.get(endpoint, {
+      params: {
+        page,
+        with_genres: with_genres || undefined,
+        sort_by,
+        query: search,
+      },
+    });
     return data;
   },
 };

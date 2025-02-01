@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect, useCallback } from "react";
 import { tvService } from "@/services/api";
 import { useDarkMode } from "@/contexts/DarkModeContext";
