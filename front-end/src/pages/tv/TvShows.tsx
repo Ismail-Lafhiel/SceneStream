@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { tvService } from "@/services/api";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { TvShowCard } from "@/components/tv/TvShowCard";
 import { ITVShow, IGenre, IPaginatedResponse } from "@/interfaces";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   FaFire,
   FaStar,
@@ -24,56 +24,59 @@ interface TvSection {
   fetchShows: (page: number) => Promise<IPaginatedResponse<ITVShow>>;
 }
 
+const initialSections: TvSection[] = [
+  {
+    id: "popular",
+    title: "Popular TV Shows",
+    icon: <FaFire className="text-orange-500" />,
+    description: "Most watched shows this week",
+    shows: [],
+    isLoading: true,
+    page: 1,
+    hasMore: true,
+    fetchShows: tvService.getPopularTvShows,
+  },
+  {
+    id: "topRated",
+    title: "Top Rated",
+    icon: <FaStar className="text-yellow-500" />,
+    description: "Highest rated shows of all time",
+    shows: [],
+    isLoading: true,
+    page: 1,
+    hasMore: true,
+    fetchShows: tvService.getTopRatedTvShows,
+  },
+  {
+    id: "onAir",
+    title: "Currently Airing",
+    icon: <FaPlay className="text-blue-500" />,
+    description: "Shows currently on air",
+    shows: [],
+    isLoading: true,
+    page: 1,
+    hasMore: true,
+    fetchShows: tvService.getOnAirTvShows,
+  },
+  {
+    id: "upcoming",
+    title: "Upcoming Shows",
+    icon: <FaCalendar className="text-green-500" />,
+    description: "Shows premiering soon",
+    shows: [],
+    isLoading: true,
+    page: 1,
+    hasMore: true,
+    fetchShows: tvService.getUpcomingTvShows,
+  },
+];
+
 const TvShows = () => {
   const { isDarkMode } = useDarkMode();
   const [genres, setGenres] = useState<Record<number, string>>({});
   const [error, setError] = useState<string | null>(null);
-  const [sections, setSections] = useState<TvSection[]>([
-    {
-      id: "popular",
-      title: "Popular TV Shows",
-      icon: <FaFire className="text-orange-500" />,
-      description: "Most watched shows this week",
-      shows: [],
-      isLoading: true,
-      page: 1,
-      hasMore: true,
-      fetchShows: tvService.getPopularTvShows,
-    },
-    {
-      id: "topRated",
-      title: "Top Rated",
-      icon: <FaStar className="text-yellow-500" />,
-      description: "Highest rated shows of all time",
-      shows: [],
-      isLoading: true,
-      page: 1,
-      hasMore: true,
-      fetchShows: tvService.getTopRatedTvShows,
-    },
-    {
-      id: "onAir",
-      title: "Currently Airing",
-      icon: <FaPlay className="text-blue-500" />,
-      description: "Shows currently on air",
-      shows: [],
-      isLoading: true,
-      page: 1,
-      hasMore: true,
-      fetchShows: tvService.getOnAirTvShows,
-    },
-    {
-      id: "upcoming",
-      title: "Upcoming Shows",
-      icon: <FaCalendar className="text-green-500" />,
-      description: "Shows premiering soon",
-      shows: [],
-      isLoading: true,
-      page: 1,
-      hasMore: true,
-      fetchShows: tvService.getUpcomingTvShows,
-    },
-  ]);
+  const [sections, setSections] = useState<TvSection[]>(initialSections);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // Fetch genres
   useEffect(() => {
@@ -97,39 +100,49 @@ const TvShows = () => {
     fetchGenres();
   }, []);
 
+  // Fetch shows for a single section
+  const fetchSectionShows = useCallback(async (section: TvSection) => {
+    try {
+      const response = await section.fetchShows(1);
+      return {
+        ...section,
+        shows: response.results,
+        isLoading: false,
+        hasMore: response.page < response.total_pages,
+      };
+    } catch (error) {
+      console.error(`Error fetching ${section.title}:`, error);
+      return {
+        ...section,
+        isLoading: false,
+        hasMore: false,
+      };
+    }
+  }, []);
+
   // Initial fetch for all sections
   useEffect(() => {
     const fetchInitialShows = async () => {
       try {
-        const updatedSections = await Promise.all(
-          sections.map(async (section) => {
-            try {
-              const response = await section.fetchShows(1);
-              return {
-                ...section,
-                shows: response.results,
-                isLoading: false,
-                hasMore: response.page < response.total_pages,
-              };
-            } catch (error) {
-              console.error(`Error fetching ${section.title}:`, error);
-              return {
-                ...section,
-                isLoading: false,
-                hasMore: false,
-              };
-            }
-          })
-        );
-        setSections(updatedSections);
+        setIsInitialLoading(true);
+        const updatedSections = [...sections];
+        
+        // Fetch shows for each section sequentially
+        for (let i = 0; i < sections.length; i++) {
+          const updatedSection = await fetchSectionShows(sections[i]);
+          updatedSections[i] = updatedSection;
+          setSections([...updatedSections]); // Update state after each section
+        }
       } catch (error) {
         console.error("Error fetching TV shows:", error);
         setError("Failed to load TV shows");
+      } finally {
+        setIsInitialLoading(false);
       }
     };
 
     fetchInitialShows();
-  }, []);
+  }, [fetchSectionShows]);
 
   const loadMore = async (sectionId: string) => {
     const sectionIndex = sections.findIndex((s) => s.id === sectionId);
@@ -147,11 +160,11 @@ const TvShows = () => {
 
     try {
       const response = await section.fetchShows(section.page + 1);
-
+      
       updatedSections[sectionIndex] = {
         ...section,
         shows: [...section.shows, ...response.results],
-        page: response.page,
+        page: section.page + 1,
         isLoading: false,
         hasMore: response.page < response.total_pages,
       };
@@ -198,86 +211,85 @@ const TvShows = () => {
               isDarkMode ? "text-gray-400" : "text-gray-600"
             }`}
           >
-            Discover the latest and greatest television series from around the
-            world
+            Discover the latest and greatest television series from around the world
           </p>
         </div>
 
         {/* TV Show Sections */}
         <div className="space-y-16">
-          {sections.map((section, index) => (
-            <motion.section
-              key={section.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="space-y-8"
-            >
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  {section.icon}
-                  <h2
-                    className={`text-2xl font-bold ${
-                      isDarkMode ? "text-white" : "text-gray-900"
+          <AnimatePresence>
+            {sections.map((section, index) => (
+              <motion.section
+                key={section.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="space-y-8"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    {section.icon}
+                    <h2
+                      className={`text-2xl font-bold ${
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      {section.title}
+                    </h2>
+                  </div>
+                  <p
+                    className={`text-sm ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
                     }`}
                   >
-                    {section.title}
-                  </h2>
+                    {section.description}
+                  </p>
                 </div>
-                <p
-                  className={`text-sm ${
-                    isDarkMode ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {section.description}
-                </p>
-              </div>
 
-              <div className="space-y-6">
-                {section.shows.length === 0 && section.isLoading ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-                    {[...Array(5)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="aspect-[2/3] rounded-xl bg-gray-800 animate-pulse"
-                      />
-                    ))}
-                  </div>
-                ) : (
+                <div className="space-y-6">
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                     {section.shows.map((show) => (
                       <TvShowCard key={show.id} show={show} genres={genres} />
                     ))}
+                    {section.isLoading &&
+                      [...Array(5)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="aspect-[2/3] rounded-xl bg-gray-800 animate-pulse"
+                        />
+                      ))}
                   </div>
-                )}
 
-                {section.hasMore && (
-                  <div className="flex justify-center">
-                    <button
-                      onClick={() => loadMore(section.id)}
-                      disabled={section.isLoading}
-                      className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-300 ${
-                        isDarkMode
-                          ? "bg-gray-800 hover:bg-gray-700 text-white"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-900"
-                      } ${
-                        section.isLoading ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                    >
-                      {section.isLoading ? (
-                        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          <FaChevronDown className="text-sm" />
-                          Load More
-                        </>
-                      )}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </motion.section>
-          ))}
+                  {section.hasMore && (
+                    <div className="flex justify-center">
+                      <button
+                        onClick={() => loadMore(section.id)}
+                        disabled={section.isLoading}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-300 ${
+                          isDarkMode
+                            ? "bg-gray-800 hover:bg-gray-700 text-white"
+                            : "bg-gray-100 hover:bg-gray-200 text-gray-900"
+                        } ${
+                          section.isLoading
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                      >
+                        {section.isLoading ? (
+                          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <FaChevronDown className="text-sm" />
+                            Load More
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </motion.section>
+            ))}
+          </AnimatePresence>
         </div>
       </div>
     </div>
