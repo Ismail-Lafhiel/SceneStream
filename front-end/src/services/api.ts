@@ -73,4 +73,40 @@ export const movieService = {
     const { data } = await tmdbApi.get(`/movie/${movieId}/similar`);
     return data;
   },
+  getPopularTvShows: async (page = 1) => {
+    const { data } = await tmdbApi.get("/tv/popular", { params: { page } });
+    return data;
+  },
+
+  getTvShowDetails: async (tvId: number) => {
+    const { data } = await tmdbApi.get(`/tv/${tvId}`, {
+      params: {
+        append_to_response: "credits,videos",
+      },
+    });
+    return data;
+  },
+
+  getSimilarTvShows: async (tvId: number) => {
+    const { data } = await tmdbApi.get(`/tv/${tvId}/similar`);
+    return data;
+  },
+  getTopRatedMovies: async (page = 1) => {
+    const { data } = await tmdbApi.get("/movie/top_rated", {
+      params: { page },
+    });
+    return data;
+  },
+
+  getNowPlayingMovies: async (page = 1) => {
+    const { data } = await tmdbApi.get("/movie/now_playing", {
+      params: { page },
+    });
+    return data;
+  },
+
+  getUpcomingMovies: async (page = 1) => {
+    const { data } = await tmdbApi.get("/movie/upcoming", { params: { page } });
+    return data;
+  },
 };

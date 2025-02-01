@@ -8,20 +8,18 @@ import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
 import UnauthGuard from "@/guards/UnauthGuard";
 import MovieDetails from "@/pages/movie/MovieDetails";
-// import Movies from "@/pages/movie/Movies";
-// import TvShows from "@/pages/tv/TvShows";
-// import TvShowDetails from "@/pages/tv/TvShowDetails";
 import NotFound from "@/pages/error/NotFound";
+import Movies from "@/pages/movie/Movies";
 
 const publicRoutes: RouteObject[] = [
   {
     path: "/",
     element: <Home />,
   },
-  // {
-  //   path: "/movies",
-  //   element: <Movies />,
-  // },
+  {
+    path: "/movies",
+    element: <Movies />,
+  },
   {
     path: "/movie/:id/details",
     element: <MovieDetails />,
