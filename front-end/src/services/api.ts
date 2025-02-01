@@ -56,4 +56,8 @@ export const movieService = {
     );
     return data;
   },
+  getMovieVideos: async (movieId: number) => {
+    const { data } = await tmdbApi.get(`/movie/${movieId}/videos`);
+    return data;
+  },
 };

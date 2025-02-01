@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { movieService } from "@/services/api";
 import { Link } from "react-router-dom";
-import { IMovie, IGenre } from "@/interfaces";
+import { IMovie } from "@/interfaces";
+import { TrailerModal } from "@/components/common/TrailerModal";
 
 const MovieCard = ({
   movie,
@@ -13,6 +14,8 @@ const MovieCard = ({
   movie: IMovie;
   genres: Record<number, string>;
 }) => {
+  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const imageUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : "/path-to-fallback-image.jpg";
@@ -22,65 +25,82 @@ const MovieCard = ({
     : "Unknown";
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.05 }}
-      transition={{ duration: 0.2 }}
-      className="relative group"
-      layout
-    >
-      <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-gray-800">
-        <img
-          src={imageUrl}
-          alt={movie.title}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />
+    <>
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        transition={{ duration: 0.2 }}
+        className="relative group"
+        layout
+      >
+        <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-gray-800 cursor-pointer">
+          <Link to={`/movie/${movie.id}/details`} className="block w-full h-full">
+            <img
+              src={imageUrl}
+              alt={movie.title}
+              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                isImageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              loading="lazy"
+              onLoad={() => setIsImageLoaded(true)}
+            />
+            {!isImageLoaded && (
+              <div className="absolute inset-0 bg-gray-800 animate-pulse" />
+            )}
+          </Link>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />
 
-        {/* Hover Content */}
-        <div className="absolute inset-0 flex flex-col justify-end p-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
-          {/* Rating Badge */}
-          <div className="absolute top-4 right-4 flex items-center gap-1 px-2 py-1 rounded-full bg-black/60 backdrop-blur-sm">
-            <FaStar className="text-yellow-400 text-xs" />
-            <span className="text-white text-sm font-medium">
-              {movie.vote_average.toFixed(1)}
-            </span>
-          </div>
-
-          {/* Movie Info */}
-          <div className="space-y-3">
-            <h3 className="text-white font-semibold text-lg leading-tight line-clamp-2">
-              {movie.title}
-            </h3>
-            <div className="flex items-center gap-3 text-sm text-gray-300">
-              <span className="flex items-center gap-1">
-                <FaClock className="text-xs" />
-                {new Date(movie.release_date).getFullYear()}
+          {/* Hover Content */}
+          <div className="absolute inset-0 flex flex-col justify-end p-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
+            {/* Rating Badge */}
+            <div className="absolute top-4 right-4 flex items-center gap-1 px-2 py-1 rounded-full bg-black/60 backdrop-blur-sm">
+              <FaStar className="text-yellow-400 text-xs" />
+              <span className="text-white text-sm font-medium">
+                {movie.vote_average.toFixed(1)}
               </span>
-              <span>•</span>
-              <span>{movieGenre}</span>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-2 pt-2">
-              <Link
-                to={`/movie/${movie.id}`}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25"
-              >
-                <FaPlay size={12} />
-                Play
+            {/* Movie Info */}
+            <div className="space-y-3">
+              <Link to={`/movie/${movie.id}/details`}>
+                <h3 className="text-white font-semibold text-lg leading-tight line-clamp-2 hover:text-blue-400 transition-colors cursor-pointer">
+                  {movie.title}
+                </h3>
               </Link>
-              <Link
-                to={`/movie/${movie.id}/details`}
-                className="p-2 bg-gray-700/80 hover:bg-gray-600/80 text-white rounded-lg transition-all duration-300 hover:shadow-lg"
-              >
-                <FaInfoCircle size={16} />
-              </Link>
+              <div className="flex items-center gap-3 text-sm text-gray-300">
+                <span className="flex items-center gap-1">
+                  <FaClock className="text-xs" />
+                  {new Date(movie.release_date).getFullYear()}
+                </span>
+                <span>•</span>
+                <span>{movieGenre}</span>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setIsTrailerOpen(true)}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25 cursor-pointer"
+                >
+                  <FaPlay size={12} />
+                  Play Trailer
+                </button>
+                <Link
+                  to={`/movie/${movie.id}/details`}
+                  className="p-2 bg-gray-700/80 hover:bg-gray-600/80 text-white rounded-lg transition-all duration-300 hover:shadow-lg cursor-pointer"
+                >
+                  <FaInfoCircle size={16} />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+      <TrailerModal
+        movieId={movie.id}
+        isOpen={isTrailerOpen}
+        onClose={() => setIsTrailerOpen(false)}
+      />
+    </>
   );
 };
 
@@ -127,17 +147,19 @@ export const PopularTitles = () => {
             data = await movieService.getNewReleases();
             break;
           default:
-            // If activeCategory is a number (genre ID)
             if (!isNaN(Number(activeCategory))) {
-              data = await movieService.getMoviesByGenre(
-                Number(activeCategory)
-              );
+              data = await movieService.getMoviesByGenre(Number(activeCategory));
             } else {
               data = await movieService.getPopularMovies();
             }
         }
 
-        setMovies(data.results);
+        // Limit to 10 movies and ensure they have poster images
+        const filteredMovies = data.results
+          .filter((movie) => movie.poster_path)
+          .slice(0, 10);
+
+        setMovies(filteredMovies);
       } catch (error) {
         console.error("Error fetching movies:", error);
         setError("Failed to load movies");
@@ -176,7 +198,7 @@ export const PopularTitles = () => {
           </div>
           <Link
             to="/browse"
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors cursor-pointer ${
               isDarkMode
                 ? "bg-gray-800 hover:bg-gray-700 text-white"
                 : "bg-gray-100 hover:bg-gray-200 text-gray-900"
@@ -191,7 +213,7 @@ export const PopularTitles = () => {
         <div className="flex gap-2 mb-8 overflow-x-auto pb-4 scrollbar-hide">
           <button
             onClick={() => setActiveCategory("trending")}
-            className={`category-tab ${
+            className={`category-tab cursor-pointer ${
               activeCategory === "trending" ? "active" : ""
             }`}
           >
@@ -199,7 +221,7 @@ export const PopularTitles = () => {
           </button>
           <button
             onClick={() => setActiveCategory("new")}
-            className={`category-tab ${
+            className={`category-tab cursor-pointer ${
               activeCategory === "new" ? "active" : ""
             }`}
           >
@@ -209,7 +231,7 @@ export const PopularTitles = () => {
             <button
               key={id}
               onClick={() => setActiveCategory(id)}
-              className={`category-tab ${
+              className={`category-tab cursor-pointer ${
                 activeCategory === id ? "active" : ""
               }`}
             >
@@ -219,13 +241,17 @@ export const PopularTitles = () => {
         </div>
 
         {/* Error State */}
-        {error && <div className="text-red-500 text-center py-8">{error}</div>}
+        {error && (
+          <div className="text-red-500 text-center py-8 rounded-lg bg-red-50 dark:bg-red-900/10">
+            {error}
+          </div>
+        )}
 
         {/* Movies Grid */}
         <AnimatePresence mode="wait">
           {isLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
-              {[...Array(12)].map((_, i) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+              {[...Array(10)].map((_, i) => (
                 <div
                   key={i}
                   className="aspect-[2/3] rounded-xl bg-gray-800 animate-pulse"
@@ -235,7 +261,7 @@ export const PopularTitles = () => {
           ) : (
             <motion.div
               layout
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6"
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"
             >
               {movies.map((movie) => (
                 <MovieCard key={movie.id} movie={movie} genres={genres} />
