@@ -7,12 +7,33 @@ import Home from "@/pages/home/Home";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
 import UnauthGuard from "@/guards/UnauthGuard";
+import MovieDetails from "@/pages/movie/MovieDetails";
+// import Movies from "@/pages/movie/Movies";
+// import TvShows from "@/pages/tv/TvShows";
+// import TvShowDetails from "@/pages/tv/TvShowDetails";
+import NotFound from "@/pages/error/NotFound";
 
 const publicRoutes: RouteObject[] = [
   {
     path: "/",
     element: <Home />,
   },
+  // {
+  //   path: "/movies",
+  //   element: <Movies />,
+  // },
+  {
+    path: "/movie/:id/details",
+    element: <MovieDetails />,
+  },
+  // {
+  //   path: "/tv",
+  //   element: <TvShows />,
+  // },
+  // {
+  //   path: "/tv/:id/details",
+  //   element: <TvShowDetails />,
+  // },
   {
     element: <UnauthGuard />,
     children: [
@@ -37,6 +58,10 @@ const publicRoutes: RouteObject[] = [
         element: <ResetPassword />,
       },
     ],
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ];
 

@@ -60,4 +60,17 @@ export const movieService = {
     const { data } = await tmdbApi.get(`/movie/${movieId}/videos`);
     return data;
   },
+  getMovieDetails: async (movieId: number) => {
+    const { data } = await tmdbApi.get(`/movie/${movieId}`, {
+      params: {
+        append_to_response: "credits,videos",
+      },
+    });
+    return data;
+  },
+
+  getSimilarMovies: async (movieId: number) => {
+    const { data } = await tmdbApi.get(`/movie/${movieId}/similar`);
+    return data;
+  },
 };
