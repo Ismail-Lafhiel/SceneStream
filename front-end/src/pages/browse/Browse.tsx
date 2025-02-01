@@ -53,6 +53,7 @@ const Browse = () => {
   const [totalResults, setTotalResults] = useState(0);
   const [isFilterSticky, setIsFilterSticky] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
+  const [heroMovie, setHeroMovie] = useState<IMovie | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,6 +65,21 @@ const Browse = () => {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const fetchHeroMovie = async () => {
+      try {
+        const { results } = await movieService.getPopularMovies(1);
+        // Get a random movie from the top 5 popular movies
+        const randomMovie = results[Math.floor(Math.random() * 5)];
+        setHeroMovie(randomMovie);
+      } catch (error) {
+        console.error("Error fetching hero movie:", error);
+      }
+    };
+
+    fetchHeroMovie();
   }, []);
 
   // Fetch genres
@@ -186,42 +202,73 @@ const Browse = () => {
       className={`min-h-screen ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
     >
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-blue-600 to-purple-700 pt-32 pb-20">
-        <div className="absolute inset-0 bg-black/30" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">
-              Discover Amazing Content
-            </h1>
-            <p className="text-lg text-gray-200 max-w-2xl mx-auto">
-              Browse through thousands of movies and TV shows, filter by genre,
-              and find your next favorite entertainment
-            </p>
+      <div className="relative h-[450px] overflow-hidden">
+        {/* Background Image */}
+        {heroMovie && (
+          <div className="absolute inset-0">
+            <img
+              src={`https://image.tmdb.org/t/p/original${heroMovie.backdrop_path}`}
+              alt={heroMovie.title}
+              className="w-full h-full object-fill"
+            />
+            {/* Gradient Overlays */}
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/70 to-gray-900/50" />
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-900/50 via-transparent to-gray-900/50" />
           </div>
+        )}
 
-          {/* Search Bar */}
-          <div className="mt-8 max-w-3xl mx-auto">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search for movies or TV shows..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full px-6 py-4 pl-12 text-lg rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500 transition-all ${
-                  isDarkMode
-                    ? "bg-gray-800 text-white placeholder-gray-400"
-                    : "bg-white text-gray-900 placeholder-gray-500"
-                }`}
-              />
-              <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <FaTimes />
-                </button>
-              )}
+        {/* Content */}
+        <div className="relative h-full">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center">
+            <div className="text-center max-w-3xl mx-auto">
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="text-5xl font-bold text-white mb-6"
+              >
+                Discover Amazing Content
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-xl text-gray-200 mb-12"
+              >
+                Browse through thousands of movies and TV shows, filter by
+                genre, and find your next favorite entertainment
+              </motion.p>
+
+              {/* Search Bar */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="relative max-w-2xl mx-auto"
+              >
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search for movies or TV shows..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={`w-full px-6 py-5 pl-14 text-lg rounded-full shadow-xl focus:ring-2 focus:ring-blue-500 transition-all ${
+                      isDarkMode
+                        ? "bg-gray-900/80 text-white placeholder-gray-400 backdrop-blur-sm"
+                        : "bg-white/90 text-gray-900 placeholder-gray-500 backdrop-blur-sm"
+                    }`}
+                  />
+                  <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <FaTimes />
+                    </button>
+                  )}
+                </div>
+              </motion.div>
             </div>
           </div>
         </div>
