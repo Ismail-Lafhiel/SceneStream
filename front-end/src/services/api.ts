@@ -1,5 +1,5 @@
 import axios from "axios";
-import { IPaginatedResponse, IMovie } from "@/interfaces";
+import { IMovie, IGenre, IPaginatedResponse } from "@/interfaces";
 
 const tmdbApi = axios.create({
   baseURL: "https://api.themoviedb.org/3",
@@ -20,12 +20,40 @@ export const movieService = {
     return data;
   },
 
-  getMovieDetails: async (movieId: number) => {
-    const { data } = await tmdbApi.get<IMovie>(`/movie/${movieId}`);
+  getTrendingMovies: async (timeWindow: "day" | "week" = "week") => {
+    const { data } = await tmdbApi.get<IPaginatedResponse<IMovie>>(
+      `/trending/movie/${timeWindow}`
+    );
     return data;
   },
 
-  // Add more movie-related API calls here
-};
+  getMoviesByGenre: async (genreId: number, page = 1) => {
+    const { data } = await tmdbApi.get<IPaginatedResponse<IMovie>>(
+      "/discover/movie",
+      {
+        params: {
+          with_genres: genreId,
+          page,
+        },
+      }
+    );
+    return data;
+  },
 
-export default tmdbApi;
+  getGenres: async () => {
+    const { data } = await tmdbApi.get<{ genres: IGenre[] }>(
+      "/genre/movie/list"
+    );
+    return data.genres;
+  },
+
+  getNewReleases: async (page = 1) => {
+    const { data } = await tmdbApi.get<IPaginatedResponse<IMovie>>(
+      "/movie/now_playing",
+      {
+        params: { page },
+      }
+    );
+    return data;
+  },
+};

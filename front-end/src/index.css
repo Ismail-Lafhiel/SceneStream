@@ -26,3 +26,32 @@
   opacity: 0;
   animation-fill-mode: forwards;
 }
+
+.category-tab {
+  @apply px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300;
+}
+
+.category-tab.active {
+  @apply bg-blue-600 text-white;
+}
+
+.dark .category-tab.active {
+    @apply bg-blue-700 text-white;
+  }
+
+.dark .category-tab {
+  @apply bg-gray-800 text-gray-400 hover:bg-gray-700;
+}
+
+.category-tab {
+  @apply bg-gray-200 text-gray-700 hover:bg-gray-300;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
