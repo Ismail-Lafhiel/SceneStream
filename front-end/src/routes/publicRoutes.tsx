@@ -11,6 +11,7 @@ import MovieDetails from "@/pages/movie/MovieDetails";
 import NotFound from "@/pages/error/NotFound";
 import Movies from "@/pages/movie/Movies";
 import TvShows from "@/pages/tv/TvShows";
+import TvShowDetails from "@/pages/tv/TvShowDetails";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -29,10 +30,10 @@ const publicRoutes: RouteObject[] = [
     path: "/tv",
     element: <TvShows />,
   },
-  // {
-  //   path: "/tv/:id/details",
-  //   element: <TvShowDetails />,
-  // },
+  {
+    path: "/tv/:id/details",
+    element: <TvShowDetails />,
+  },
   {
     element: <UnauthGuard />,
     children: [

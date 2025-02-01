@@ -179,7 +179,7 @@ const TvShows = () => {
 
   return (
     <div
-      className={`min-h-screen pt-20 ${
+      className={`min-h-screen pt-5 ${
         isDarkMode ? "bg-gray-900" : "bg-gray-50"
       }`}
     >

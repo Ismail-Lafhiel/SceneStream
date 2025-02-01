@@ -13,7 +13,6 @@ import {
 } from "react-icons/fa";
 import { MovieSection } from "@/interfaces";
 
-
 const Movies = () => {
   const { isDarkMode } = useDarkMode();
   const [genres, setGenres] = useState<Record<number, string>>({});
@@ -178,11 +177,27 @@ const Movies = () => {
 
   return (
     <div
-      className={`min-h-screen ${
-        isDarkMode ? "bg-gray-900" : "bg-gray-50"
-      }`}
+      className={`min-h-screen mt-5 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+        {/* Hero Section */}
+        <div className="mb-16">
+          <h1
+            className={`text-4xl font-bold mb-4 ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            Movies
+          </h1>
+          <p
+            className={`text-lg ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
+            Discover the latest and greatest movies from around the
+            world
+          </p>
+        </div>
         {sections.map((section, index) => (
           <motion.section
             key={section.id}

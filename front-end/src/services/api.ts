@@ -6,6 +6,7 @@ import {
   ITVShow,
   IVideo,
 } from "@/interfaces";
+import { TVShowDetails } from "@/interfaces/utility.interface";
 
 const tmdbApi = axios.create({
   baseURL: "https://api.themoviedb.org/3",
@@ -63,7 +64,7 @@ export const movieService = {
     );
     return data;
   },
-  
+
   getMovieDetails: async (movieId: number) => {
     const { data } = await tmdbApi.get(`/movie/${movieId}`, {
       params: {
@@ -155,6 +156,21 @@ export const tvService = {
 
   getTvShowVideos: async (tvId: number): Promise<{ results: IVideo[] }> => {
     const { data } = await tmdbApi.get(`/tv/${tvId}/videos`);
+    return data;
+  },
+  getTvShowDetails: async (tvId: number): Promise<TVShowDetails> => {
+    const { data } = await tmdbApi.get(`/tv/${tvId}`, {
+      params: {
+        append_to_response: "credits,videos",
+      },
+    });
+    return data;
+  },
+
+  getSimilarTvShows: async (
+    tvId: number
+  ): Promise<IPaginatedResponse<ITVShow>> => {
+    const { data } = await tmdbApi.get(`/tv/${tvId}/similar`);
     return data;
   },
 };
