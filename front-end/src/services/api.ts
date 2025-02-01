@@ -1,5 +1,5 @@
 import axios from "axios";
-import { IMovie, IGenre, IPaginatedResponse } from "@/interfaces";
+import { IMovie, IGenre, IPaginatedResponse, ITVShow } from "@/interfaces";
 
 const tmdbApi = axios.create({
   baseURL: "https://api.themoviedb.org/3",
@@ -108,5 +108,37 @@ export const movieService = {
   getUpcomingMovies: async (page = 1) => {
     const { data } = await tmdbApi.get("/movie/upcoming", { params: { page } });
     return data;
+  },
+};
+export const tvService = {
+  getPopularTvShows: async (page = 1): Promise<IPaginatedResponse<ITVShow>> => {
+    const { data } = await tmdbApi.get("/tv/popular", { params: { page } });
+    return data;
+  },
+
+  getTopRatedTvShows: async (
+    page = 1
+  ): Promise<IPaginatedResponse<ITVShow>> => {
+    const { data } = await tmdbApi.get("/tv/top_rated", { params: { page } });
+    return data;
+  },
+
+  getOnAirTvShows: async (page = 1): Promise<IPaginatedResponse<ITVShow>> => {
+    const { data } = await tmdbApi.get("/tv/on_the_air", { params: { page } });
+    return data;
+  },
+
+  getUpcomingTvShows: async (
+    page = 1
+  ): Promise<IPaginatedResponse<ITVShow>> => {
+    const { data } = await tmdbApi.get("/tv/airing_today", {
+      params: { page },
+    });
+    return data;
+  },
+
+  getTvGenres: async (): Promise<IGenre[]> => {
+    const { data } = await tmdbApi.get("/genre/tv/list");
+    return data.genres;
   },
 };
