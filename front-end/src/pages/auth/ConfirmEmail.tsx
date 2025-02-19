@@ -69,12 +69,13 @@ const ConfirmEmail = () => {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {/* Background Layer */}
       <div className="absolute inset-0 z-0">
         <div
           className={`absolute inset-0 z-10 ${
             isDarkMode
-              ? "bg-gradient-to-r from-blue-900/90 to-black/70"
-              : "bg-gradient-to-r from-blue-600/80 to-blue-800/80"
+              ? "bg-gradient-to-br from-blue-900/95 via-black/90 to-black/95"
+              : "bg-gradient-to-br from-blue-100/95 via-white/90 to-white/95"
           }`}
         ></div>
         <img
@@ -84,11 +85,15 @@ const ConfirmEmail = () => {
         />
       </div>
 
+      {/* Form Container */}
       <div
-        className={`relative z-10 max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl backdrop-blur-sm ${
-          isDarkMode ? "bg-gray-800/90" : "bg-white"
+        className={`relative z-10 max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl backdrop-blur-sm transform transition-all duration-500 ${
+          isDarkMode
+            ? "bg-gray-800/40 border border-blue-500/20"
+            : "bg-white/80 border border-blue-200"
         }`}
       >
+        {/* Logo and Title */}
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <div
@@ -104,50 +109,56 @@ const ConfirmEmail = () => {
             </div>
           </div>
           <h2
-            className={`text-4xl font-bold mb-2 ${
+            className={`text-4xl font-extrabold tracking-tight mb-2 ${
               isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
             Verify Your Email
           </h2>
-          <p className={`${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+          <p
+            className={`text-lg ${
+              isDarkMode ? "text-gray-300" : "text-gray-600"
+            }`}
+          >
             We've sent a verification code to{" "}
-            <span
-              className={`${isDarkMode ? "text-blue-400" : "text-blue-600"}`}
-            >
-              {email}
-            </span>
+            <span className="font-medium text-blue-500">{email}</span>
           </p>
         </div>
 
+        {/* Verification Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <TextInput
             id="code"
             label="Verification Code"
+            icon={FaEnvelope}
             placeholder="Enter the 6-digit code"
             error={errors.code?.message}
             {...register("code")}
           />
 
-          <Button type="submit" isLoading={isLoading} className="w-full cursor-pointer">
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200"
+          >
             Verify Email
           </Button>
 
           <div className="text-center space-y-4">
-            <p className={`${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-              Didn't receive the code?
-            </p>
-            <button
-              type="button"
-              onClick={handleResendCode}
-              className={`text-sm font-medium cursor-pointer ${
-                isDarkMode
-                  ? "text-blue-400 hover:text-blue-300"
-                  : "text-blue-600 hover:text-blue-500"
+            <p
+              className={`text-sm ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
               }`}
             >
-              Resend verification code
-            </button>
+              Didn't receive the code?{" "}
+              <button
+                type="button"
+                onClick={handleResendCode}
+                className="font-medium text-blue-500 hover:text-blue-400"
+              >
+                Resend verification code
+              </button>
+            </p>
           </div>
         </form>
       </div>

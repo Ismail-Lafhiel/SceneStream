@@ -1,4 +1,3 @@
-// src/pages/auth/ForgotPassword.tsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEnvelope } from "react-icons/fa";
@@ -63,8 +62,8 @@ const ForgotPassword = () => {
         <div
           className={`absolute inset-0 z-10 ${
             isDarkMode
-              ? "bg-gradient-to-r from-blue-900/90 to-black/70"
-              : "bg-gradient-to-r from-blue-600/80 to-blue-800/80"
+              ? "bg-gradient-to-br from-blue-900/95 via-black/90 to-black/95"
+              : "bg-gradient-to-br from-blue-100/95 via-white/90 to-white/95"
           }`}
         ></div>
         <img
@@ -76,23 +75,31 @@ const ForgotPassword = () => {
 
       {/* Form Container */}
       <div
-        className={`relative z-10 max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl backdrop-blur-sm ${
-          isDarkMode ? "bg-gray-800/90" : "bg-white"
+        className={`relative z-10 max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl backdrop-blur-sm transform transition-all duration-500 ${
+          isDarkMode
+            ? "bg-gray-800/40 border border-blue-500/20"
+            : "bg-white/80 border border-blue-200"
         }`}
       >
+        {/* Title Section */}
         <div className="text-center">
           <h2
-            className={`text-4xl font-bold mb-2 ${
-              isDarkMode ? "text-white" : "text-gray-800"
+            className={`text-4xl font-extrabold tracking-tight mb-2 ${
+              isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
             Forgot Password
           </h2>
-          <p className={`${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+          <p
+            className={`text-lg ${
+              isDarkMode ? "text-gray-300" : "text-gray-600"
+            }`}
+          >
             We'll send you a verification code
           </p>
         </div>
 
+        {/* Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <TextInput
             id="email"
@@ -103,18 +110,18 @@ const ForgotPassword = () => {
             {...register("email")}
           />
 
-          <Button type="submit" isLoading={isLoading}>
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200"
+          >
             Send Reset Code
           </Button>
 
           <div className="text-center">
             <Link
               to="/login"
-              className={`text-sm font-medium ${
-                isDarkMode
-                  ? "text-blue-400 hover:text-blue-300"
-                  : "text-blue-600 hover:text-blue-500"
-              }`}
+              className="font-medium text-blue-500 hover:text-blue-400 transition-colors duration-200"
             >
               Back to Sign In
             </Link>
