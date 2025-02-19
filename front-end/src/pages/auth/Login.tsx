@@ -63,7 +63,6 @@ const Login = () => {
         return;
       }
 
-      // Handle different authentication steps if needed
       if (result?.signInStep === "CONFIRM_SIGN_UP") {
         navigate("/verify-email", {
           state: { email: data.email },
@@ -71,7 +70,6 @@ const Login = () => {
         });
       }
     } catch (err: any) {
-      // Handle specific error cases
       switch (err.name) {
         case "UserNotFoundException":
           setError("email", {
@@ -105,7 +103,6 @@ const Login = () => {
   };
 
   const handleSocialLogin = async (provider: "google" | "facebook") => {
-    // You can implement social sign-in later when needed
     toast.promise(new Promise((resolve) => setTimeout(resolve, 1500)), {
       loading: `Connecting to ${provider}...`,
       success: `Successfully connected with ${provider}!`,

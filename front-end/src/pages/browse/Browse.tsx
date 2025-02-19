@@ -202,7 +202,7 @@ const Browse = () => {
       className={`min-h-screen ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
     >
       {/* Hero Section */}
-      <div className="relative h-[450px] overflow-hidden">
+      <div className="relative h-[550px] overflow-hidden">
         {/* Background Image */}
         {heroMovie && (
           <div className="absolute inset-0">
@@ -211,7 +211,6 @@ const Browse = () => {
               alt={heroMovie.title}
               className="w-full h-full object-fill"
             />
-            {/* Gradient Overlays */}
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/70 to-gray-900/50" />
             <div className="absolute inset-0 bg-gradient-to-r from-gray-900/50 via-transparent to-gray-900/50" />
           </div>
@@ -252,7 +251,7 @@ const Browse = () => {
                     placeholder="Search for movies or TV shows..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full px-6 py-5 pl-14 text-lg rounded-full shadow-xl focus:ring-2 focus:ring-blue-500 transition-all ${
+                    className={`w-full px-6 py-2.5 pl-14 text-lg rounded-full shadow-xl focus:ring-2 focus:ring-blue-500 transition-all ${
                       isDarkMode
                         ? "bg-gray-900/80 text-white placeholder-gray-400 backdrop-blur-sm"
                         : "bg-white/90 text-gray-900 placeholder-gray-500 backdrop-blur-sm"

@@ -13,6 +13,7 @@ import Movies from "@/pages/movie/Movies";
 import TvShows from "@/pages/tv/TvShows";
 import TvShowDetails from "@/pages/tv/TvShowDetails";
 import Browse from "@/pages/browse/Browse";
+import Pricing from "@/pages/pricing/Pricing";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -38,6 +39,10 @@ const publicRoutes: RouteObject[] = [
   {
     path: "/tv/:id/details",
     element: <TvShowDetails />,
+  },
+  {
+    path: "/pricing",
+    element: <Pricing />,
   },
   {
     element: <UnauthGuard />,
