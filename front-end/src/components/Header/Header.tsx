@@ -10,6 +10,7 @@ import {
   FaFilm,
   FaTv,
   FaDollarSign,
+  FaChevronDown,
 } from "react-icons/fa";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,7 +18,6 @@ import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Click Outside Hook
 const useClickOutside = (handler: () => void) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -50,9 +50,18 @@ const Header = () => {
   const mobileMenuRef = useClickOutside(() => setIsMenuOpen(false));
 
   const navigationItems = [
-    { path: "/movies", label: "Movies", icon: <FaFilm className="h-4 w-4" /> },
-    { path: "/tv", label: "TV Shows", icon: <FaTv className="h-4 w-4" /> },
-    { path: "/pricing", label: "Pricing", icon: <FaDollarSign className="h-4 w-4" /> },
+    {
+      path: "/browse",
+      label: "Browse",
+      icon: <FaSearch className="h-3 w-3" />,
+    },
+    { path: "/movies", label: "Movies", icon: <FaFilm className="h-3 w-3" /> },
+    { path: "/tv", label: "TV Shows", icon: <FaTv className="h-3 w-3" /> },
+    {
+      path: "/pricing",
+      label: "Pricing",
+      icon: <FaDollarSign className="h-3 w-3" />,
+    },
   ];
 
   useEffect(() => {
@@ -85,23 +94,22 @@ const Header = () => {
   return (
     <nav
       className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled
+        isScrolled || !shouldBeTransparent
           ? isDarkMode
-            ? "bg-gray-900/95 backdrop-blur-sm border-b border-gray-800"
-            : "bg-white/95 backdrop-blur-sm border-b border-gray-200"
-          : shouldBeTransparent
-          ? "bg-transparent"
-          : isDarkMode
-          ? "bg-gray-900 border-b border-gray-800"
-          : "bg-white border-b border-gray-200"
+            ? "bg-gray-900/80 backdrop-blur-md border-b border-blue-500/20"
+            : "bg-white/80 backdrop-blur-md border-b border-blue-200"
+          : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <div className="flex items-center space-x-8">
-            <Link to="/" className="flex items-center">
-              <FaPlay className="text-blue-500 h-8 w-8" />
+            <Link
+              to="/"
+              className="flex items-center group transition-transform hover:scale-105"
+            >
+              <FaPlay className="text-blue-500 h-8 w-8 group-hover:text-blue-600 transition-colors" />
               <h1
                 className={`text-3xl font-bold ml-2 font-['Poppins'] ${
                   isDarkMode || shouldBeTransparent
@@ -113,18 +121,18 @@ const Header = () => {
               </h1>
             </Link>
 
-            {/* Navigation Links */}
-            <div className="hidden md:flex items-center space-x-4">
+            {/* Desktop Navigation Links */}
+            <div className="hidden lg:flex items-center space-x-4">
               {navigationItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                     location.pathname === item.path
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      ? "bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/20"
                       : isDarkMode
-                      ? "text-gray-200 hover:bg-gray-800"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "text-gray-200 hover:bg-gray-800/50 backdrop-blur-sm"
+                      : "text-gray-700 hover:bg-gray-100/50 backdrop-blur-sm"
                   }`}
                 >
                   {item.icon}
@@ -134,33 +142,26 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            <div className="relative">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search movies & shows"
-                className={`pl-10 pr-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 transition-colors ${
-                  isDarkMode
-                    ? "bg-gray-800 text-white border border-gray-700 focus:border-gray-600"
-                    : "bg-gray-200/50 text-gray-900 border border-gray-200 focus:border-gray-300"
-                }`}
-              />
-            </div>
-
+          {/* Desktop Right Section */}
+          <div className="hidden lg:flex items-center space-x-6">
+            {/* Profile/Auth Section */}
             {isAuthenticated ? (
               <div className="relative" ref={profileDropdownRef}>
                 <button
                   onClick={toggleProfileMenu}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                     isDarkMode
-                      ? "text-gray-200 hover:bg-gray-800"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "text-gray-200 hover:bg-gray-800/50 backdrop-blur-sm"
+                      : "text-gray-700 hover:bg-gray-100/50 backdrop-blur-sm"
                   }`}
                 >
                   <FaUser className="h-5 w-5" />
                   <span>{user?.attributes?.name || "User"}</span>
+                  <FaChevronDown
+                    className={`h-4 w-4 transition-transform duration-300 ${
+                      isProfileMenuOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
 
                 <AnimatePresence>
@@ -169,18 +170,18 @@ const Header = () => {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg py-1 border ${
+                      className={`absolute right-0 mt-2 w-48 rounded-xl shadow-lg py-1 border backdrop-blur-md ${
                         isDarkMode
-                          ? "bg-gray-800 border-gray-700"
-                          : "bg-white border-gray-200"
+                          ? "bg-gray-800/90 border-blue-500/20"
+                          : "bg-white/90 border-blue-200"
                       }`}
                     >
                       <Link
                         to="/profile"
                         className={`block px-4 py-2 text-sm transition-colors ${
                           isDarkMode
-                            ? "text-gray-200 hover:bg-gray-700"
-                            : "text-gray-700 hover:bg-gray-100"
+                            ? "text-gray-200 hover:bg-gray-700/50"
+                            : "text-gray-700 hover:bg-gray-100/50"
                         }`}
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
@@ -190,8 +191,8 @@ const Header = () => {
                         to="/settings"
                         className={`block px-4 py-2 text-sm transition-colors ${
                           isDarkMode
-                            ? "text-gray-200 hover:bg-gray-700"
-                            : "text-gray-700 hover:bg-gray-100"
+                            ? "text-gray-200 hover:bg-gray-700/50"
+                            : "text-gray-700 hover:bg-gray-100/50"
                         }`}
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
@@ -201,8 +202,8 @@ const Header = () => {
                         onClick={handleSignOut}
                         className={`block w-full text-left px-4 py-2 text-sm transition-colors ${
                           isDarkMode
-                            ? "text-gray-200 hover:bg-gray-700"
-                            : "text-gray-700 hover:bg-gray-100"
+                            ? "text-gray-200 hover:bg-gray-700/50"
+                            : "text-gray-700 hover:bg-gray-100/50"
                         }`}
                       >
                         Sign Out
@@ -215,29 +216,30 @@ const Header = () => {
               <>
                 <Link
                   to="/login"
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 backdrop-blur-sm ${
                     isDarkMode
-                      ? "text-gray-200 hover:bg-gray-800"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "text-gray-200 hover:bg-gray-800/50"
+                      : "text-gray-700 hover:bg-gray-100/50"
                   }`}
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-lg hover:shadow-blue-500/25"
+                  className="bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25 hover:scale-105"
                 >
                   Start Free Trial
                 </Link>
               </>
             )}
 
+            {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`p-2 rounded-full transition-all duration-300 ${
                 isDarkMode
-                  ? "text-gray-200 hover:bg-gray-800"
-                  : "text-gray-700 hover:bg-gray-100"
+                  ? "text-gray-200 hover:bg-gray-800/50 backdrop-blur-sm"
+                  : "text-gray-700 hover:bg-gray-100/50 backdrop-blur-sm"
               }`}
               aria-label="Toggle dark mode"
             >
@@ -245,26 +247,14 @@ const Header = () => {
             </button>
           </div>
 
-          {/* Mobile Navigation Button */}
-          <div className="flex items-center space-x-4 md:hidden">
-            {isAuthenticated && (
-              <button
-                onClick={toggleProfileMenu}
-                className={`p-2 rounded-lg ${
-                  isDarkMode
-                    ? "text-gray-200 hover:bg-gray-800"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                <FaUser size={20} />
-              </button>
-            )}
+          {/* Mobile Navigation Buttons */}
+          <div className="flex items-center space-x-4 lg:hidden">
             <button
               onClick={toggleDarkMode}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`p-2 rounded-full transition-all duration-300 ${
                 isDarkMode
-                  ? "text-gray-200 hover:bg-gray-800"
-                  : "text-gray-700 hover:bg-gray-100"
+                  ? "text-gray-200 hover:bg-gray-800/50 backdrop-blur-sm"
+                  : "text-gray-700 hover:bg-gray-100/50 backdrop-blur-sm"
               }`}
               aria-label="Toggle dark mode"
             >
@@ -272,10 +262,10 @@ const Header = () => {
             </button>
             <button
               onClick={toggleMenu}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`p-2 rounded-full transition-all duration-300 ${
                 isDarkMode
-                  ? "text-gray-200 hover:bg-gray-800"
-                  : "text-gray-700 hover:bg-gray-100"
+                  ? "text-gray-200 hover:bg-gray-800/50 backdrop-blur-sm"
+                  : "text-gray-700 hover:bg-gray-100/50 backdrop-blur-sm"
               }`}
               aria-label="Toggle menu"
             >
@@ -292,18 +282,20 @@ const Header = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden"
+              className={`lg:hidden overflow-hidden backdrop-blur-md rounded-b-xl border-t ${
+                isDarkMode ? "border-blue-500/20" : "border-blue-200"
+              }`}
             >
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                <div className="relative mb-4">
+              <div className="px-4 py-4 space-y-4">
+                <div className="relative">
                   <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
                     placeholder="Search movies & shows"
-                    className={`w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                    className={`w-full pl-10 pr-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
                       isDarkMode
-                        ? "bg-gray-800 text-white border border-gray-700 focus:border-gray-600"
-                        : "bg-gray-100 text-gray-900 border border-gray-200 focus:border-gray-300"
+                        ? "bg-gray-800/50 text-white border border-gray-700/50 focus:border-blue-500/50"
+                        : "bg-white/50 text-gray-900 border border-gray-200/50 focus:border-blue-500/50"
                     }`}
                   />
                 </div>
@@ -312,12 +304,12 @@ const Header = () => {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-base font-medium ${
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-full text-base font-medium transition-all duration-300 ${
                       location.pathname === item.path
-                        ? "bg-blue-600 text-white"
+                        ? "bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/20"
                         : isDarkMode
-                        ? "text-gray-200 hover:bg-gray-800"
-                        : "text-gray-700 hover:bg-gray-100"
+                        ? "text-gray-200 hover:bg-gray-800/50"
+                        : "text-gray-700 hover:bg-gray-100/50"
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -327,13 +319,13 @@ const Header = () => {
                 ))}
 
                 {isAuthenticated ? (
-                  <>
+                  <div className="space-y-2">
                     <Link
                       to="/profile"
-                      className={`block px-3 py-2 rounded-lg text-base font-medium ${
+                      className={`block px-4 py-2 rounded-full text-base font-medium transition-all duration-300 ${
                         isDarkMode
-                          ? "text-gray-200 hover:bg-gray-800"
-                          : "text-gray-700 hover:bg-gray-100"
+                          ? "text-gray-200 hover:bg-gray-800/50"
+                          : "text-gray-700 hover:bg-gray-100/50"
                       }`}
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -341,10 +333,10 @@ const Header = () => {
                     </Link>
                     <Link
                       to="/settings"
-                      className={`block px-3 py-2 rounded-lg text-base font-medium ${
+                      className={`block px-4 py-2 rounded-full text-base font-medium transition-all duration-300 ${
                         isDarkMode
-                          ? "text-gray-200 hover:bg-gray-800"
-                          : "text-gray-700 hover:bg-gray-100"
+                          ? "text-gray-200 hover:bg-gray-800/50"
+                          : "text-gray-700 hover:bg-gray-100/50"
                       }`}
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -355,23 +347,23 @@ const Header = () => {
                         handleSignOut();
                         setIsMenuOpen(false);
                       }}
-                      className={`block w-full text-left px-3 py-2 rounded-lg text-base font-medium ${
+                      className={`block w-full text-left px-4 py-2 rounded-full text-base font-medium transition-all duration-300 ${
                         isDarkMode
-                          ? "text-gray-200 hover:bg-gray-800"
-                          : "text-gray-700 hover:bg-gray-100"
+                          ? "text-gray-200 hover:bg-gray-800/50"
+                          : "text-gray-700 hover:bg-gray-100/50"
                       }`}
                     >
                       Sign Out
                     </button>
-                  </>
+                  </div>
                 ) : (
-                  <>
+                  <div className="space-y-2">
                     <Link
                       to="/login"
-                      className={`block px-3 py-2 rounded-lg text-base font-medium ${
+                      className={`block w-full px-4 py-2 rounded-full text-base font-medium text-center transition-all duration-300 ${
                         isDarkMode
-                          ? "text-gray-200 hover:bg-gray-800"
-                          : "text-gray-700 hover:bg-gray-100"
+                          ? "text-gray-200 hover:bg-gray-800/50"
+                          : "text-gray-700 hover:bg-gray-100/50"
                       }`}
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -379,12 +371,12 @@ const Header = () => {
                     </Link>
                     <Link
                       to="/register"
-                      className="block w-full text-center bg-blue-600 text-white px-3 py-2 rounded-lg text-base font-medium hover:bg-blue-700 transition-colors"
+                      className="block w-full bg-blue-600 text-white px-4 py-2 rounded-full text-base font-medium text-center hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Start Free Trial
                     </Link>
-                  </>
+                  </div>
                 )}
               </div>
             </motion.div>

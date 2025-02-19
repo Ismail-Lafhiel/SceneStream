@@ -30,20 +30,18 @@ export const TvShowCard = ({ show, genres }: TvShowCardProps) => {
         layout
       >
         <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-gray-800">
-          <Link to={`/tv/${show.id}/details`}>
-            <img
-              src={imageUrl}
-              alt={show.name}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
-                isImageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              loading="lazy"
-              onLoad={() => setIsImageLoaded(true)}
-            />
-            {!isImageLoaded && (
-              <div className="absolute inset-0 bg-gray-800 animate-pulse" />
-            )}
-          </Link>
+          <img
+            src={imageUrl}
+            alt={show.name}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              isImageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            loading="lazy"
+            onLoad={() => setIsImageLoaded(true)}
+          />
+          {!isImageLoaded && (
+            <div className="absolute inset-0 bg-gray-800 animate-pulse" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />
 
           <div className="absolute inset-0 flex flex-col justify-end p-4 opacity-0 group-hover:opacity-100 transition-all duration-300">

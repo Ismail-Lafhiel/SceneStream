@@ -31,23 +31,18 @@ export const MovieCard = ({
         layout
       >
         <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-gray-800 cursor-pointer">
-          <Link
-            to={`/movie/${movie.id}/details`}
-            className="block w-full h-full"
-          >
-            <img
-              src={imageUrl}
-              alt={movie.title}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
-                isImageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              loading="lazy"
-              onLoad={() => setIsImageLoaded(true)}
-            />
-            {!isImageLoaded && (
-              <div className="absolute inset-0 bg-gray-800 animate-pulse" />
-            )}
-          </Link>
+          <img
+            src={imageUrl}
+            alt={movie.title}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              isImageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            loading="lazy"
+            onLoad={() => setIsImageLoaded(true)}
+          />
+          {!isImageLoaded && (
+            <div className="absolute inset-0 bg-gray-800 animate-pulse" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />
 
           {/* Hover Content */}

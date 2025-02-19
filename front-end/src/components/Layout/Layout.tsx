@@ -14,7 +14,6 @@ const Layout = () => {
     >
       <Header />
       <main className="flex-grow pt-20">
-        {/* pt-20 to account for fixed header height */}
         <Outlet />
       </main>
       <Footer />
