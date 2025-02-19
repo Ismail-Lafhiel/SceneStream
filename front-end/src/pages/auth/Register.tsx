@@ -17,7 +17,7 @@ import Button from "@/components/ui/Button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 
-// Form validation schema
+// Form validation schema remains the same
 const registerSchema = z
   .object({
     fullName: z
@@ -39,10 +39,7 @@ const registerSchema = z
     confirmPassword: z.string().min(1, "Please confirm your password"),
     acceptTerms: z
       .boolean()
-      .refine(
-        (val) => val === true,
-        "You must accept the terms and conditions"
-      ),
+      .refine((val) => val === true, "You must accept the terms and conditions"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -104,8 +101,8 @@ const Register = () => {
         <div
           className={`absolute inset-0 z-10 ${
             isDarkMode
-              ? "bg-gradient-to-r from-blue-900/90 to-black/70"
-              : "bg-gradient-to-r from-blue-600/80 to-blue-800/80"
+              ? "bg-gradient-to-br from-blue-900/95 via-black/90 to-black/95"
+              : "bg-gradient-to-br from-blue-100/95 via-white/90 to-white/95"
           }`}
         ></div>
         <img
@@ -117,19 +114,26 @@ const Register = () => {
 
       {/* Form Container */}
       <div
-        className={`relative z-10 max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl backdrop-blur-sm ${
-          isDarkMode ? "bg-gray-800/90" : "bg-white"
+        className={`relative z-10 max-w-md w-full space-y-8 p-8 rounded-xl shadow-2xl backdrop-blur-sm transform transition-all duration-500 ${
+          isDarkMode
+            ? "bg-gray-800/40 border border-blue-500/20"
+            : "bg-white/80 border border-blue-200"
         }`}
       >
+        {/* Logo and Title */}
         <div className="text-center">
           <h2
-            className={`text-4xl font-bold mb-2 ${
-              isDarkMode ? "text-white" : "text-gray-800"
+            className={`text-4xl font-extrabold tracking-tight mb-2 ${
+              isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
             Create Account
           </h2>
-          <p className={`${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+          <p
+            className={`text-lg ${
+              isDarkMode ? "text-gray-300" : "text-gray-600"
+            }`}
+          >
             Join SceneStream today
           </p>
         </div>
@@ -185,14 +189,14 @@ const Register = () => {
                     I agree to the{" "}
                     <Link
                       to="/terms"
-                      className="text-blue-400 hover:text-blue-300"
+                      className="text-blue-500 hover:text-blue-400"
                     >
                       Terms of Service
                     </Link>{" "}
                     and{" "}
                     <Link
                       to="/privacy"
-                      className="text-blue-400 hover:text-blue-300"
+                      className="text-blue-500 hover:text-blue-400"
                     >
                       Privacy Policy
                     </Link>
@@ -204,7 +208,11 @@ const Register = () => {
             </div>
           </div>
 
-          <Button type="submit" className="cursor-pointer" isLoading={isLoading}>
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200"
+          >
             Create Account
           </Button>
 
@@ -219,34 +227,42 @@ const Register = () => {
             </div>
             <div className="relative flex justify-center text-sm">
               <span
-                className={`px-2 ${
+                className={`px-4 ${
                   isDarkMode
-                    ? "bg-gray-800/90 text-gray-400"
-                    : "bg-white/90 text-gray-500"
+                    ? "bg-gray-800/40 text-gray-400"
+                    : "bg-white/80 text-gray-500"
                 }`}
               >
-                Or register with
+                Or continue with
               </span>
             </div>
           </div>
 
           {/* Social Login Buttons */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <Button
-              className="cursor-pointer"
               type="button"
               variant="social"
               icon={FaGoogle}
               onClick={() => handleSocialRegister("google")}
+              className={`flex items-center justify-center px-4 py-2 border rounded-lg text-sm font-medium transition-colors duration-200 ${
+                isDarkMode
+                  ? "border-gray-700 hover:bg-gray-700/50 text-gray-300"
+                  : "border-gray-300 hover:bg-gray-50 text-gray-700"
+              }`}
             >
               Google
             </Button>
             <Button
-              className="cursor-pointer"
               type="button"
               variant="social"
               icon={FaFacebookF}
               onClick={() => handleSocialRegister("facebook")}
+              className={`flex items-center justify-center px-4 py-2 border rounded-lg text-sm font-medium transition-colors duration-200 ${
+                isDarkMode
+                  ? "border-gray-700 hover:bg-gray-700/50 text-gray-300"
+                  : "border-gray-300 hover:bg-gray-50 text-gray-700"
+              }`}
             >
               Facebook
             </Button>
@@ -263,7 +279,7 @@ const Register = () => {
             Already have an account?{" "}
             <Link
               to="/login"
-              className="font-medium text-blue-400 hover:text-blue-300"
+              className="font-medium text-blue-500 hover:text-blue-400"
             >
               Sign in
             </Link>

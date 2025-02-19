@@ -9,6 +9,7 @@ import {
   FaUser,
   FaFilm,
   FaTv,
+  FaDollarSign,
 } from "react-icons/fa";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -51,6 +52,7 @@ const Header = () => {
   const navigationItems = [
     { path: "/movies", label: "Movies", icon: <FaFilm className="h-4 w-4" /> },
     { path: "/tv", label: "TV Shows", icon: <FaTv className="h-4 w-4" /> },
+    { path: "/pricing", label: "Pricing", icon: <FaDollarSign className="h-4 w-4" /> },
   ];
 
   useEffect(() => {

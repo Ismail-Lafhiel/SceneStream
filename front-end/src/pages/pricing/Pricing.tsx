@@ -1,4 +1,3 @@
-import { IMovie } from "@/interfaces";
 import {
   Film,
   Users,
@@ -8,11 +7,10 @@ import {
   Smartphone,
   Monitor,
 } from "lucide-react";
-import { useState } from "react";
+import { useDarkMode } from "@/contexts/DarkModeContext";
 
 const Pricing = () => {
-  const [heroMovie, setHeroMovie] = useState<IMovie | null>(null);
-
+  const { isDarkMode } = useDarkMode();
   return (
     <section className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="absolute inset-0 z-0">
