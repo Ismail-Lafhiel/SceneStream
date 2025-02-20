@@ -141,7 +141,6 @@ const Header = () => {
               ))}
             </div>
           </div>
-
           {/* Desktop Right Section */}
           <div className="hidden lg:flex items-center space-x-6">
             {/* Profile/Auth Section */}
@@ -156,7 +155,7 @@ const Header = () => {
                   }`}
                 >
                   <FaUser className="h-5 w-5" />
-                  <span>{user?.attributes?.name || "User"}</span>
+                  <span>{user?.name || "User"}</span>
                   <FaChevronDown
                     className={`h-4 w-4 transition-transform duration-300 ${
                       isProfileMenuOpen ? "rotate-180" : ""

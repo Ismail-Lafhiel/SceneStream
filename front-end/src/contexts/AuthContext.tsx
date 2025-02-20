@@ -9,6 +9,7 @@ import {
   resetPassword,
   confirmResetPassword,
   updatePassword,
+  fetchUserAttributes,
 } from "aws-amplify/auth";
 
 interface AuthContextType {
@@ -40,8 +41,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkCurrentUser = async () => {
     try {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
+      // const currentUser = await getCurrentUser();
+      const userAttributes = await fetchUserAttributes();
+      setUser(userAttributes);
       setIsAuthenticated(true);
     } catch (error) {
       setUser(null);
@@ -55,10 +57,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
     });
     if (isSignedIn) {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
+      const userAttributes = await fetchUserAttributes();
+      setUser(userAttributes);
       setIsAuthenticated(true);
-      return currentUser;
+      return userAttributes;
     }
     return nextStep;
   };
