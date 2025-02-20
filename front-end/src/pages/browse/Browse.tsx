@@ -185,7 +185,7 @@ const Browse = () => {
   return (
     <div className="relative min-h-screen">
       {/* Background Layer */}
-      <div className="fixed inset-0 z-0">
+      <div className="absolute inset-0 z-0">
         <div
           className={`absolute inset-0 z-10 ${
             isDarkMode

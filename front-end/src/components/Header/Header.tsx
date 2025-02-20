@@ -107,18 +107,28 @@ const Header = () => {
           <div className="flex items-center space-x-8">
             <Link
               to="/"
-              className="flex items-center group transition-transform hover:scale-105"
+              className="group relative flex items-center transition-transform hover:scale-105"
+              aria-label="SceneStream Home"
             >
-              <FaPlay className="text-blue-500 h-8 w-8 group-hover:text-blue-600 transition-colors" />
-              <h1
-                className={`text-3xl font-bold ml-2 font-['Poppins'] ${
-                  isDarkMode || shouldBeTransparent
-                    ? "text-white"
-                    : "text-gray-900"
-                }`}
-              >
-                SceneStream
+              {/* Main Text */}
+              <h1 className="relative text-3xl font-black tracking-tight">
+                {/* First part of text with Netflix-style gradient */}
+                <span className={`bg-gradient-to-b bg-clip-text text-transparent transition-all duration-300 ${isDarkMode ? "from-white to-gray-300 group-hover:from-white" : "from-gray-900 to-gray-600 group-hover:from-gray-900"}`}>
+                  Scene
+                </span>
+                {/* Second part of text */}
+                <span className="bg-gradient-to-b from-blue-600 to-blue-700 bg-clip-text text-transparent transition-all duration-300 group-hover:from-blue-500 group-hover:to-blue-800">
+                  Stream
+                </span>
+
+                {/* Netflix-style shine effect */}
+                <span className="absolute left-0 top-0 h-full w-full overflow-hidden">
+                  <span className="absolute -left-full top-0 h-full w-full animate-[shine_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent transform rotate-12" />
+                </span>
               </h1>
+
+              {/* Bottom shadow effect */}
+              <div className="absolute -bottom-1 left-0 h-1 w-full bg-gradient-to-r from-transparent via-blue-600/50 to-transparent opacity-50 blur-sm" />
             </Link>
 
             {/* Desktop Navigation Links */}
@@ -148,7 +158,7 @@ const Header = () => {
               <div className="relative" ref={profileDropdownRef}>
                 <button
                   onClick={toggleProfileMenu}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 cursor-pointer ${
                     isDarkMode
                       ? "text-gray-200 hover:bg-gray-800/50 backdrop-blur-sm"
                       : "text-gray-700 hover:bg-gray-100/50 backdrop-blur-sm"

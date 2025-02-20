@@ -5,7 +5,6 @@ import {
   confirmSignUp,
   resendSignUpCode,
   signOut,
-  getCurrentUser,
   resetPassword,
   confirmResetPassword,
   updatePassword,

@@ -133,7 +133,7 @@ export const DeviceSection = () => {
           >
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
               <img
-                src="https://your-cdn.com/devices-mockup.png"
+                src="/images/devices-mockup.jpg"
                 alt="Devices mockup"
                 className="w-full h-full object-cover"
               />
