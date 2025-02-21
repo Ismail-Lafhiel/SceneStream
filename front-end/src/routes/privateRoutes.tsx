@@ -1,5 +1,5 @@
-// src/routes/privateRoutes.tsx
 import AuthGuard from "@/guards/AuthGuard";
+import Bookmarks from "@/pages/bookmark/Bookmarks";
 import Profile from "@/pages/profile/Profile";
 
 const privateRoutes = [
@@ -9,6 +9,10 @@ const privateRoutes = [
       {
         path: "/profile",
         element: <Profile />,
+      },
+      {
+        path: "/bookmarks",
+        element: <Bookmarks />,
       },
     ],
   },

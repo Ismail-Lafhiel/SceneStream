@@ -1,4 +1,3 @@
-// pages/MovieDetails.tsx
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -8,6 +7,7 @@ import {
   FaClock,
   FaCalendar,
   FaLanguage,
+  FaBookmark,
 } from "react-icons/fa";
 import { movieService } from "@/services/api";
 import { useDarkMode } from "@/contexts/DarkModeContext";
@@ -16,8 +16,7 @@ import { Cast } from "@/components/movie/Cast";
 import { SimilarMovies } from "@/components/movie/SimilarMovies";
 import { Loading } from "@/components/common/Loading";
 import { MovieDetailsInterface } from "@/interfaces";
-
-
+import { useBookmarks } from "@/hooks/useBookmarks";
 
 export const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +25,7 @@ export const MovieDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const { addBookmark, isBookmarked } = useBookmarks();
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -46,6 +46,10 @@ export const MovieDetails = () => {
       fetchMovieDetails();
     }
   }, [id]);
+
+  const handleAddToBookmark = (msg = "boomark") => {
+    addBookmark(movie);
+  };
 
   if (isLoading) return <Loading />;
   if (error)
@@ -136,10 +140,20 @@ export const MovieDetails = () => {
                 <div className="flex gap-4 pt-4">
                   <button
                     onClick={() => setIsTrailerOpen(true)}
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-colors"
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 cursor-pointer text-white rounded-lg flex items-center gap-2 transition-colors"
                   >
                     <FaPlay />
                     Watch Trailer
+                  </button>
+                  <button
+                    onClick={() => handleAddToBookmark()}
+                    className="px-6 py-3 bg-gray-100 text-gray-800 font-medium hover:bg-gray-300 cursor-pointer rounded-lg flex items-center gap-2 transition-colors"
+                    disabled={movie ? isBookmarked(movie.id) : false}
+                  >
+                    <FaBookmark className="text-gray-800" />
+                    {movie && isBookmarked(movie.id)
+                      ? "Bookmarked"
+                      : "Add to bookmark"}
                   </button>
                 </div>
               </motion.div>

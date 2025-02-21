@@ -323,7 +323,7 @@ const Browse = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortBy)}
-                  className={`px-4 py-2 rounded-full shadow-lg transition-all duration-300 ${
+                  className={`px-2 py-2 rounded-full shadow-lg transition-all duration-300 ${
                     isDarkMode
                       ? "bg-gray-800/50 text-white border-gray-700"
                       : "bg-white/50 text-gray-900 border-gray-200"

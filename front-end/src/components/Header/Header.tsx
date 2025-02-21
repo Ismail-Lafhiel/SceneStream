@@ -197,7 +197,7 @@ const Header = () => {
                         Your Profile
                       </Link>
                       <Link
-                        to="/settings"
+                        to="/bookmarks"
                         className={`block px-4 py-2 text-sm transition-colors ${
                           isDarkMode
                             ? "text-gray-200 hover:bg-gray-700/50"
@@ -205,7 +205,7 @@ const Header = () => {
                         }`}
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
-                        Settings
+                        Bookmarks
                       </Link>
                       <button
                         onClick={handleSignOut}
