@@ -3,11 +3,10 @@ const config = require("../config/config");
 const { ApiError } = require("../utils/errors");
 const User = require("../models/user");
 
-// Create a verifier for Cognito tokens
 const verifier = CognitoJwtVerifier.create({
   userPoolId: config.aws.userPoolId,
   clientId: config.aws.clientId,
-  tokenUse: "access", // or 'id'
+  tokenUse: "access",
 });
 
 module.exports = async (req, res, next) => {
@@ -33,7 +32,6 @@ module.exports = async (req, res, next) => {
       let user = await User.findOne({ cognitoId: payload.sub });
 
       if (!user) {
-        // Create new user in our database
         user = new User({
           cognitoId: payload.sub,
           email: payload.email,
@@ -41,13 +39,11 @@ module.exports = async (req, res, next) => {
         });
         await user.save();
       } else if (user.email !== payload.email) {
-        // Update if email changed
         user.email = payload.email;
         await user.save();
       }
     } catch (dbError) {
       console.error("Database error in auth middleware:", dbError);
-      // Continue with the request even if DB operation fails
     }
 
     next();

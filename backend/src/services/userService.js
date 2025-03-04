@@ -1,5 +1,3 @@
-// services/userService.js - Hybrid approach
-
 const { CognitoIdentityServiceProvider } = require("aws-sdk");
 const config = require("../config/config");
 const { ApiError } = require("../utils/errors");
@@ -11,7 +9,7 @@ const cognito = new CognitoIdentityServiceProvider({
 
 exports.getUserById = async (userId) => {
   try {
-    // First, try to get user from our local database
+    // get user from our mongodb database
     let user = await User.findOne({ cognitoId: userId });
     let cognitoUser;
 
@@ -26,7 +24,7 @@ exports.getUserById = async (userId) => {
     if (result.Users && result.Users.length > 0) {
       const cognitoUserData = result.Users[0];
 
-      // Transform Cognito user attributes to a usable format
+      // Transforming Cognito user attributes to a usable format
       const attributes = {};
       cognitoUserData.Attributes.forEach((attr) => {
         attributes[attr.Name] = attr.Value;
@@ -40,7 +38,7 @@ exports.getUserById = async (userId) => {
         status: cognitoUserData.UserStatus,
       };
 
-      // If user doesn't exist in our DB, create them
+      // If user doesn't exist in our mongoDB, create it
       if (!user) {
         user = new User({
           cognitoId: cognitoUser.cognitoId,
@@ -49,7 +47,7 @@ exports.getUserById = async (userId) => {
         });
         await user.save();
       }
-      // If user exists but data is different, update them
+      // If user exists but data is different, update it
       else if (
         user.email !== cognitoUser.email ||
         user.name !== cognitoUser.name
@@ -67,7 +65,7 @@ exports.getUserById = async (userId) => {
       };
     }
 
-    // If user exists in our DB but not in Cognito (unusual case)
+    // If user exists in our mongoDB but not in Cognito (unusual case)
     if (user) {
       return user;
     }
@@ -83,7 +81,7 @@ exports.getAllUsers = async () => {
   try {
     const params = {
       UserPoolId: config.aws.userPoolId,
-      Limit: 60, // Adjust as needed
+      Limit: 60,
     };
 
     let users = [];
