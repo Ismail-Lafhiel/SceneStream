@@ -2,6 +2,9 @@ const { CognitoIdentityServiceProvider } = require("aws-sdk");
 const config = require("../config/config");
 const { ApiError } = require("../utils/errors");
 const User = require("../models/user");
+const {
+  generateTemporaryPassword,
+} = require("../helpers/generateTemporaryPassword");
 
 const cognito = new CognitoIdentityServiceProvider({
   region: config.aws.region,
@@ -44,6 +47,7 @@ exports.getUserById = async (userId) => {
           cognitoId: cognitoUser.cognitoId,
           email: cognitoUser.email,
           name: cognitoUser.name,
+          role: "USER", // Default role
         });
         await user.save();
       }
@@ -77,13 +81,93 @@ exports.getUserById = async (userId) => {
   }
 };
 
+exports.createAdminUser = async (userData) => {
+  try {
+    // First create the user in Cognito
+    const params = {
+      UserPoolId: config.aws.userPoolId,
+      Username: userData.email,
+      TemporaryPassword:
+        userData.temporaryPassword || generateTemporaryPassword(),
+      UserAttributes: [
+        {
+          Name: "email",
+          Value: userData.email,
+        },
+        {
+          Name: "email_verified",
+          Value: "true",
+        },
+        {
+          Name: "name",
+          Value: userData.name,
+        },
+      ],
+    };
+
+    const result = await cognito.adminCreateUser(params).promise();
+
+    if (result.User) {
+      const cognitoId = result.User.Attributes.find(
+        (attr) => attr.Name === "sub"
+      ).Value;
+
+      // Create user in MongoDB with ADMIN role
+      const user = new User({
+        cognitoId: cognitoId,
+        email: userData.email,
+        name: userData.name,
+        role: "ADMIN",
+      });
+
+      await user.save();
+
+      return {
+        ...user.toObject(),
+        username: result.User.Username,
+        status: result.User.UserStatus,
+      };
+    }
+
+    throw new ApiError(500, "Failed to create admin user");
+  } catch (error) {
+    console.error("Error creating admin user:", error);
+    throw new ApiError(500, "Failed to create admin user: " + error.message);
+  }
+};
+
+exports.updateUserRole = async (userId, role) => {
+  try {
+    // Validate role
+    if (!["USER", "ADMIN"].includes(role)) {
+      throw new ApiError(400, "Invalid role. Must be USER or ADMIN");
+    }
+
+    // Update the role in MongoDB
+    const user = await User.findOneAndUpdate(
+      { cognitoId: userId },
+      { role: role },
+      { new: true }
+    );
+
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    return user;
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    throw new ApiError(500, "Failed to update user role");
+  }
+};
+
 exports.getAllUsers = async () => {
   try {
     const params = {
       UserPoolId: config.aws.userPoolId,
       Limit: 60,
     };
-
+    
     let users = [];
     let paginationToken = null;
 
