@@ -1,16 +1,18 @@
+// routes/userRoutes.js
 const express = require("express");
 const userController = require("../controllers/userController");
-const cognitoAuth = require("../middlewares/cognitoAuth");
-const adminAuth = require("../middlewares/adminAuth");
+const authMiddleware = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-// Protected routes
-router.get("/me", cognitoAuth, userController.getCurrentUser);
-router.get("/", cognitoAuth, userController.getAllUsers);
+// Protect all routes with authentication
+router.use(authMiddleware.protect);
 
-// Admin routes
-router.post("/admin", cognitoAuth, adminAuth, userController.createAdminUser);
-router.put("/role", cognitoAuth, adminAuth, userController.updateUserRole);
+// Fetch users data (only accessible by users in the ADMIN group)
+router.get(
+  "/admin/users",
+  authMiddleware.checkAdminGroup, // Check if the user is in the ADMIN group
+  userController.getUsersData
+);
 
 module.exports = router;

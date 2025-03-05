@@ -69,16 +69,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     fullName: string
   ) => {
-    return await signUp({
-      username: email,
-      password,
-      options: {
-        userAttributes: {
-          email,
-          name: fullName,
+    try {
+      return await signUp({
+        username: email,
+        password,
+        options: {
+          userAttributes: {
+            email,
+            name: fullName,
+            "custom:role": "USER",
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      console.error("Sign-up error:", error);
+      throw error;
+    }
   };
 
   const handleConfirmSignUp = async (email: string, code: string) => {
