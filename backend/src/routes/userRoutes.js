@@ -10,8 +10,8 @@ router.use(authMiddleware.protect);
 
 // Fetch users data (only accessible by users in the ADMIN group)
 router.get(
-  "/admin/users",
-  authMiddleware.checkAdminGroup, // Check if the user is in the ADMIN group
+  "/users",
+  authMiddleware.checkAdminGroup,
   userController.getUsersData
 );
 

@@ -14,6 +14,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
   }
 
   if (!token) {
@@ -28,8 +30,8 @@ exports.protect = catchAsync(async (req, res, next) => {
   // 3) Attach user to request object
   req.user = {
     id: decoded.sub, // Cognito user ID (sub)
-    email: decoded.email, // User's email
-    groups: decoded["cognito:groups"], // User's groups (if any)
+    email: decoded.email,
+    groups: decoded["cognito:groups"] || [],
   };
 
   next();
@@ -44,7 +46,10 @@ exports.checkAdminGroup = catchAsync(async (req, res, next) => {
 
   if (!isAdmin) {
     return next(
-      new ApiError(403, "Forbidden: You must be in the ADMIN group to access this resource.")
+      new ApiError(
+        403,
+        "Forbidden: You must be in the ADMIN group to access this resource."
+      )
     );
   }
 

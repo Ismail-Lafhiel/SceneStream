@@ -9,9 +9,9 @@ const cognito = new CognitoIdentityServiceProvider({
 });
 
 /**
- * Fetch users from Cognito and store them in MongoDB.
+ * Sync users from Cognito to MongoDB.
  */
-exports.getUsersData = async () => {
+exports.syncUsersFromCognito = async () => {
   try {
     const params = {
       UserPoolId: config.aws.userPoolId,
@@ -83,6 +83,20 @@ exports.getUsersData = async () => {
       paginationToken = result.PaginationToken;
     } while (paginationToken);
 
+    return users;
+  } catch (error) {
+    console.error("Error syncing users from Cognito:", error);
+    throw new ApiError(500, "Failed to sync users from Cognito");
+  }
+};
+
+/**
+ * Fetch users from MongoDB.
+ */
+exports.getUsersData = async () => {
+  try {
+    // Fetch users from MongoDB
+    const users = await User.find({});
     return users;
   } catch (error) {
     console.error("Error fetching users data:", error);
