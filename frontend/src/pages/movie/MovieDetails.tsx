@@ -52,24 +52,24 @@ export const MovieDetails = () => {
 
   const handleAddToBookmark = async () => {
     if (!isAuthenticated) {
-      toast.error("You must be logged in to bookmark a movie");
+      toast.error("You must be logged in to bookmark");
       return;
     }
 
     if (!movie) {
-      toast.error("Movie details not available");
+      toast.error("Details not available");
       return;
     }
 
     try {
       // Check if already bookmarked to prevent duplicate requests
       if (isBookmarked(movie.id)) {
-        toast.error("This movie is already in your bookmarks");
+        toast.error("This item is already in your bookmarks");
         return;
       }
 
       // Add the bookmark
-      await addBookmark(movie);
+      await addBookmark("movie", movie);
 
       // Success message is handled in the addBookmark function
     } catch (error: any) {
@@ -77,13 +77,13 @@ export const MovieDetails = () => {
 
       // More descriptive error messages based on the error
       if (error.response && error.response.status === 400) {
-        toast.error("Invalid movie data. Please try again.");
+        toast.error("Invalid data. Please try again.");
       } else if (error.response && error.response.status === 401) {
         toast.error("Your session has expired. Please log in again.");
       } else if (error.response && error.response.status === 409) {
-        toast.error("Movie already in bookmarks");
+        toast.error("Item already in bookmarks");
       } else {
-        toast.error("Failed to bookmark movie. Please try again later.");
+        toast.error("Failed to bookmark. Please try again later.");
       }
     }
   };

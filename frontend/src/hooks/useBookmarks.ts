@@ -1,7 +1,6 @@
-// hooks/useBookmarks.ts
 import { useEffect, useState } from "react";
-import { MovieDetailsInterface } from "@/interfaces";
-import { movieService } from "@/services/api";
+import { MovieDetailsInterface, TvShowDetailsInterface } from "@/interfaces";
+import { movieService, tvService } from "@/services/api";
 import {
   createBookmark,
   deleteBookmark,
@@ -11,17 +10,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
 
 // Local storage key for bookmarks
-const BOOKMARKS_STORAGE_KEY = import.meta.env.VITE_BOOKMARKS_STORAGE_KEY;
+const BOOKMARKS_STORAGE_KEY =
+  import.meta.env.VITE_BOOKMARKS_STORAGE_KEY || "bookmarks";
 
 // Hook for managing bookmarks
 export const useBookmarks = () => {
-  const [bookmarkedMovies, setBookmarkedMovies] = useState<
-    MovieDetailsInterface[]
+  const [bookmarks, setBookmarks] = useState<
+    (MovieDetailsInterface | TvShowDetailsInterface)[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
   const { getAuthToken, isAuthenticated } = useAuth();
 
-  // Load bookmarks from backend and local storage on mount
+  // Load bookmarks from backend on mount
   useEffect(() => {
     const loadBookmarks = async () => {
       try {
@@ -30,7 +30,7 @@ export const useBookmarks = () => {
         // Skip loading if not authenticated
         if (!isAuthenticated) {
           console.log("User not authenticated, skipping bookmark fetch");
-          setBookmarkedMovies([]);
+          setBookmarks([]);
           setIsLoading(false);
           return;
         }
@@ -39,112 +39,72 @@ export const useBookmarks = () => {
         const token = await getAuthToken();
         if (!token) {
           console.log("No auth token available");
-          setBookmarkedMovies([]);
+          setBookmarks([]);
           setIsLoading(false);
           return;
         }
-
-        console.log("Fetching bookmarks with token");
 
         // Fetch bookmarks from backend
-        const backendBookmarksResponse = await getUserBookmarks(token);
+        const response = await getUserBookmarks(token);
 
-        // If getUserBookmarks returns an empty array (on error), initialize empty bookmarks
-        if (
-          !backendBookmarksResponse ||
-          backendBookmarksResponse.length === 0
-        ) {
-          console.log("No bookmarks found or error occurred");
-          setBookmarkedMovies([]);
-          setIsLoading(false);
-          return;
-        }
+        // Extract the `data` array from the response
+        const backendBookmarks = response.data || [];
 
-        // Check the structure of the response
-        console.log(
-          "Backend bookmarks response type:",
-          typeof backendBookmarksResponse
-        );
-        console.log(
-          "Backend bookmarks structure:",
-          JSON.stringify(backendBookmarksResponse).substring(0, 100) + "..."
-        );
-
-        // Ensure we have a valid array of bookmarks
-        const backendBookmarks = Array.isArray(backendBookmarksResponse)
-          ? backendBookmarksResponse
-          : backendBookmarksResponse.data ||
-            backendBookmarksResponse.bookmarks ||
-            [];
-
+        // Ensure backendBookmarks is an array
         if (!Array.isArray(backendBookmarks)) {
           console.error("Backend bookmarks is not an array:", backendBookmarks);
-          setBookmarkedMovies([]);
+          setBookmarks([]);
           setIsLoading(false);
           return;
         }
 
-        console.log(`Processing ${backendBookmarks.length} bookmarks`);
+        // If no bookmarks found, initialize empty bookmarks
+        if (backendBookmarks.length === 0) {
+          console.log("No bookmarks found or error occurred");
+          localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify([])); // Clear local storage
+          setBookmarks([]);
+          setIsLoading(false);
+          return;
+        }
 
-        // Extract IDs safely
-        const backendBookmarkIds = backendBookmarks
-          .map((movie) => {
-            const id = movie.movieId || movie.id;
-            if (!id) {
-              console.warn("Movie without ID found:", movie);
-            }
-            return id;
-          })
-          .filter(Boolean);
-
-        console.log(`Found ${backendBookmarkIds.length} valid bookmark IDs`);
-
-        // Update local storage with backend bookmarks
+        // Update local storage with backend bookmark IDs
+        const bookmarkIds = backendBookmarks.map(
+          (bookmark: any) => bookmark.id
+        );
         localStorage.setItem(
           BOOKMARKS_STORAGE_KEY,
-          JSON.stringify(backendBookmarkIds)
+          JSON.stringify(bookmarkIds)
         );
 
-        if (backendBookmarkIds.length === 0) {
-          setBookmarkedMovies([]);
-          setIsLoading(false);
-          return;
-        }
-
-        // Fetch movie details for each bookmarked movie
-        console.log("Fetching movie details for bookmarks");
-        try {
-          const movies = await Promise.all(
-            backendBookmarkIds.map(async (id: number) => {
-              try {
-                return await movieService.getMovieDetails(id);
-              } catch (movieError) {
-                console.error(
-                  `Failed to fetch details for movie ${id}:`,
-                  movieError
-                );
-                return null;
+        // Fetch details for each bookmarked item
+        const bookmarkDetails = await Promise.all(
+          backendBookmarks.map(async (bookmark: any) => {
+            try {
+              if (bookmark.type === "movie") {
+                return await movieService.getMovieDetails(bookmark.id);
+              } else if (bookmark.type === "tv") {
+                return await tvService.getTvShowDetails(bookmark.id);
               }
-            })
-          );
+            } catch (error) {
+              console.error(
+                `Failed to fetch details for ${bookmark.type} ${bookmark.id}:`,
+                error
+              );
+              return null;
+            }
+          })
+        );
 
-          // Filter out any null results from failed fetches
-          const validMovies = movies.filter(Boolean) as MovieDetailsInterface[];
-          console.log(
-            `Successfully loaded ${validMovies.length} bookmarked movies`
-          );
+        // Filter out any null results from failed fetches
+        const validBookmarks = bookmarkDetails.filter(Boolean);
+        console.log(`Successfully loaded ${validBookmarks.length} bookmarks`);
 
-          // Set bookmarked movies
-          setBookmarkedMovies(validMovies);
-        } catch (detailsError) {
-          console.error("Error fetching movie details:", detailsError);
-          toast.error("Could not load some movie details");
-        }
+        // Set bookmarks
+        setBookmarks(validBookmarks);
       } catch (error) {
         console.error("Error loading bookmarks:", error);
         toast.error("Failed to load bookmarks");
-        // Initialize empty bookmarks array on error
-        setBookmarkedMovies([]);
+        setBookmarks([]);
       } finally {
         setIsLoading(false);
       }
@@ -153,10 +113,13 @@ export const useBookmarks = () => {
     loadBookmarks();
   }, [getAuthToken, isAuthenticated]);
 
-  // Add movie to bookmarks
-  const addBookmark = async (movie: MovieDetailsInterface | null) => {
-    if (!movie) {
-      toast.error("Cannot bookmark: No movie data provided");
+  // Add a bookmark (movie or TV show)
+  const addBookmark = async (
+    type: "movie" | "tv",
+    data: MovieDetailsInterface | TvShowDetailsInterface
+  ) => {
+    if (!data) {
+      toast.error("Cannot bookmark: No data provided");
       return;
     }
 
@@ -164,7 +127,7 @@ export const useBookmarks = () => {
       // Get the token
       const token = await getAuthToken();
       if (!token) {
-        toast.error("You must be logged in to bookmark movies");
+        toast.error("You must be logged in to bookmark");
         return;
       }
 
@@ -172,34 +135,34 @@ export const useBookmarks = () => {
       const storedIds = JSON.parse(
         localStorage.getItem(BOOKMARKS_STORAGE_KEY) || "[]"
       );
-      if (storedIds.includes(movie.id)) {
-        toast.error("This movie is already in your bookmarks");
+      if (storedIds.includes(data.id)) {
+        toast.error("This item is already in your bookmarks");
         return;
       }
 
-      console.log("Adding bookmark for movie:", movie.id, movie.title);
-
       // Add bookmark to backend
-      await createBookmark(movie, token);
+      await createBookmark(type, data, token);
 
-      // Update local storage and state
-      const updatedIds = [...storedIds, movie.id];
+      // Update local storage
+      const updatedIds = [...storedIds, data.id];
       localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify(updatedIds));
-      setBookmarkedMovies((prev) => [...prev, movie]);
+
+      // Update state
+      setBookmarks((prev) => [...prev, data]);
       toast.success("Added to bookmarks!");
     } catch (error: any) {
       console.error("Error adding bookmark:", error);
 
       if (error.response?.status === 409) {
-        toast.error("This movie is already in your bookmarks");
+        toast.error("This item is already in your bookmarks");
       } else {
         toast.error("Failed to add bookmark");
       }
     }
   };
 
-  // Remove movie from bookmarks
-  const removeBookmark = async (movieId: number) => {
+  // Remove a bookmark (movie or TV show)
+  const removeBookmark = async (type: "movie" | "tv", id: number) => {
     try {
       // Get the token
       const token = await getAuthToken();
@@ -208,22 +171,20 @@ export const useBookmarks = () => {
         return;
       }
 
-      console.log("Removing bookmark for movie:", movieId);
-
       // Remove bookmark from backend
-      await deleteBookmark(movieId, token);
+      await deleteBookmark(type, id, token);
 
       // Update local storage
       const storedIds = JSON.parse(
         localStorage.getItem(BOOKMARKS_STORAGE_KEY) || "[]"
       );
-      const updatedIds = storedIds.filter((id: number) => id !== movieId);
+      const updatedIds = storedIds.filter(
+        (storedId: number) => storedId !== id
+      );
       localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify(updatedIds));
 
       // Update state
-      setBookmarkedMovies((prev) =>
-        prev.filter((movie) => movie.id !== movieId)
-      );
+      setBookmarks((prev) => prev.filter((bookmark) => bookmark.id !== id));
       toast.success("Removed from bookmarks!");
     } catch (error) {
       console.error("Error removing bookmark:", error);
@@ -231,16 +192,16 @@ export const useBookmarks = () => {
     }
   };
 
-  // Check if a movie is bookmarked
-  const isBookmarked = (movieId: number) => {
+  // Check if an item is bookmarked
+  const isBookmarked = (id: number) => {
     const storedIds = JSON.parse(
       localStorage.getItem(BOOKMARKS_STORAGE_KEY) || "[]"
     );
-    return storedIds.includes(movieId);
+    return storedIds.includes(id);
   };
 
   return {
-    bookmarkedMovies,
+    bookmarks,
     isLoading,
     addBookmark,
     removeBookmark,

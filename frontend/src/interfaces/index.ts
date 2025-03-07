@@ -5,6 +5,7 @@ export * from "@/interfaces/api-response.interface";
 export * from "@/interfaces/video.interface";
 export * from "@/interfaces/credit.interface";
 export * from "@/interfaces/movie-details.interface";
+export * from "@/interfaces/tvshow-details.interface";
 export * from "@/interfaces/movies-section.interface";
 export * from "@/interfaces/browse.interface";
 export * from "@/interfaces/bookmarkedMovie";

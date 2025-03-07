@@ -7,8 +7,13 @@ const router = express.Router();
 // All bookmark routes require authentication
 router.use(authMiddleware.protect);
 
+// Create a bookmark (movie or TV show)
 router.post("/", bookmarkController.createBookmark);
-router.delete("/:movieId", bookmarkController.deleteBookmark);
+
+// Delete a bookmark (movie or TV show)
+router.delete("/:type/:id", bookmarkController.deleteBookmark);
+
+// Get all bookmarks (movies and TV shows) for the authenticated user
 router.get("/", bookmarkController.getUserBookmarks);
 
 module.exports = router;

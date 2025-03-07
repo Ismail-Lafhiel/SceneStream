@@ -1,30 +1,25 @@
 import axios from "axios";
-import { MovieDetailsInterface } from "@/interfaces";
+import { MovieDetailsInterface, TvShowDetailsInterface } from "@/interfaces";
 import { getUserIdFromToken } from "@/utils/authUtils";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
+/**
+ * Create a new bookmark (movie or TV show)
+ */
 export const createBookmark = async (
-  movie: MovieDetailsInterface,
+  type: "movie" | "tv",
+  data: MovieDetailsInterface | TvShowDetailsInterface,
   token: string
 ) => {
   try {
     const userId = getUserIdFromToken(token);
     if (!userId) throw new Error("User ID not found in token");
 
-    if (!movie.id || !movie.title)
-      throw new Error("Movie is missing required ID or title");
-
     const bookmarkData = {
       userId,
-      id: movie.id,
-      title: movie.title,
-      poster_path: movie.poster_path || "",
-      backdrop_path: movie.backdrop_path || "",
-      vote_average: movie.vote_average || 0,
-      runtime: movie.runtime || 0,
-      release_date: movie.release_date || "",
-      overview: movie.overview || "",
+      type,
+      ...data,
     };
 
     const response = await axios.post(`${BASE_URL}/bookmarks`, bookmarkData, {
@@ -44,9 +39,16 @@ export const createBookmark = async (
   }
 };
 
-export const deleteBookmark = async (movieId: number, token: string) => {
+/**
+ * Delete a bookmark (movie or TV show)
+ */
+export const deleteBookmark = async (
+  type: "movie" | "tv",
+  id: number,
+  token: string
+) => {
   try {
-    const response = await axios.delete(`${BASE_URL}/bookmarks/${movieId}`, {
+    const response = await axios.delete(`${BASE_URL}/bookmarks/${type}/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -58,6 +60,9 @@ export const deleteBookmark = async (movieId: number, token: string) => {
   }
 };
 
+/**
+ * Get all bookmarks (movies and TV shows) for the authenticated user
+ */
 export const getUserBookmarks = async (token: string) => {
   try {
     const response = await axios.get(`${BASE_URL}/bookmarks`, {
