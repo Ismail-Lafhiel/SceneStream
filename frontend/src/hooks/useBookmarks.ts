@@ -61,7 +61,7 @@ export const useBookmarks = () => {
         // If no bookmarks found, initialize empty bookmarks
         if (backendBookmarks.length === 0) {
           console.log("No bookmarks found or error occurred");
-          localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify([])); // Clear local storage
+          localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify([]));
           setBookmarks([]);
           setIsLoading(false);
           return;

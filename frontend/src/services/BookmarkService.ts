@@ -16,11 +16,27 @@ export const createBookmark = async (
     const userId = getUserIdFromToken(token);
     if (!userId) throw new Error("User ID not found in token");
 
+    // Ensure type is a valid value - this is what's causing your error
+    if (type !== "movie" && type !== "tv") {
+      throw new Error(
+        `Invalid bookmark type: ${type}. Must be 'movie' or 'tv'.`
+      );
+    }
+
+    // Create a clean bookmark object with required fields only
     const bookmarkData = {
       userId,
       type,
-      ...data,
+      id: data.id,
+      // Add only necessary fields based on your backend requirements
+      // For movies
+      title: "title" in data ? data.title : undefined,
+      poster_path: data.poster_path,
+      // For TV shows
+      name: "name" in data ? data.name : undefined,
     };
+
+    console.log("Creating bookmark payload:", bookmarkData); // Log the payload
 
     const response = await axios.post(`${BASE_URL}/bookmarks`, bookmarkData, {
       headers: {
@@ -48,6 +64,13 @@ export const deleteBookmark = async (
   token: string
 ) => {
   try {
+    // Ensure type is valid
+    if (type !== "movie" && type !== "tv") {
+      throw new Error(
+        `Invalid bookmark type: ${type}. Must be 'movie' or 'tv'.`
+      );
+    }
+
     const response = await axios.delete(`${BASE_URL}/bookmarks/${type}/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -77,6 +100,6 @@ export const getUserBookmarks = async (token: string) => {
       console.error("Error status:", error.response.status);
       console.error("Error data:", error.response.data);
     }
-    return [];
+    return { data: [] }; // Return expected format
   }
 };
