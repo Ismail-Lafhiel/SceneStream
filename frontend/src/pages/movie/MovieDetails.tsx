@@ -17,6 +17,8 @@ import { SimilarMovies } from "@/components/movie/SimilarMovies";
 import { Loading } from "@/components/common/Loading";
 import { MovieDetailsInterface } from "@/interfaces";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import { useAuth } from "@/contexts/AuthContext";
+import toast from "react-hot-toast";
 
 export const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +28,7 @@ export const MovieDetails = () => {
   const [error, setError] = useState<string | null>(null);
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
   const { addBookmark, isBookmarked } = useBookmarks();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -47,8 +50,42 @@ export const MovieDetails = () => {
     }
   }, [id]);
 
-  const handleAddToBookmark = (msg = "boomark") => {
-    addBookmark(movie);
+  const handleAddToBookmark = async () => {
+    if (!isAuthenticated) {
+      toast.error("You must be logged in to bookmark a movie");
+      return;
+    }
+
+    if (!movie) {
+      toast.error("Movie details not available");
+      return;
+    }
+
+    try {
+      // Check if already bookmarked to prevent duplicate requests
+      if (isBookmarked(movie.id)) {
+        toast.error("This movie is already in your bookmarks");
+        return;
+      }
+
+      // Add the bookmark
+      await addBookmark(movie);
+
+      // Success message is handled in the addBookmark function
+    } catch (error: any) {
+      console.error("Bookmark error:", error);
+
+      // More descriptive error messages based on the error
+      if (error.response && error.response.status === 400) {
+        toast.error("Invalid movie data. Please try again.");
+      } else if (error.response && error.response.status === 401) {
+        toast.error("Your session has expired. Please log in again.");
+      } else if (error.response && error.response.status === 409) {
+        toast.error("Movie already in bookmarks");
+      } else {
+        toast.error("Failed to bookmark movie. Please try again later.");
+      }
+    }
   };
 
   if (isLoading) return <Loading />;

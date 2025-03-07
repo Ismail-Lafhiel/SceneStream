@@ -9,6 +9,7 @@ import {
   confirmResetPassword,
   updatePassword,
   fetchUserAttributes,
+  fetchAuthSession,
 } from "aws-amplify/auth";
 
 interface AuthContextType {
@@ -26,6 +27,7 @@ interface AuthContextType {
     newPassword: string
   ) => Promise<any>;
   changePassword: (oldPassword: string, newPassword: string) => Promise<any>;
+  getAuthToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType>(null!);
@@ -47,6 +49,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       setUser(null);
       setIsAuthenticated(false);
+    }
+  };
+
+  const getAuthToken = async (): Promise<string | null> => {
+    try {
+      const { idToken } = (await fetchAuthSession()).tokens ?? {};
+      return idToken?.toString() || null;
+    } catch (error) {
+      console.error("Error fetching auth token:", error);
+      return null;
     }
   };
 
@@ -149,6 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         forgotPassword: handleForgotPassword,
         forgotPasswordSubmit: handleForgotPasswordSubmit,
         changePassword: handleChangePassword,
+        getAuthToken,
       }}
     >
       {children}
