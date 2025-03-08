@@ -14,6 +14,7 @@ import TvShows from "@/pages/tv/TvShows";
 import TvShowDetails from "@/pages/tv/TvShowDetails";
 import Browse from "@/pages/browse/Browse";
 import Pricing from "@/pages/pricing/Pricing";
+import TokenDebugger from "@/components/debug/TokenDebugger";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -43,6 +44,10 @@ const publicRoutes: RouteObject[] = [
   {
     path: "/pricing",
     element: <Pricing />,
+  },
+  {
+    path: "token-debug",
+    element: <TokenDebugger />,
   },
   {
     element: <UnauthGuard />,

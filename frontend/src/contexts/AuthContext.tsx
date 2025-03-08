@@ -15,6 +15,7 @@ import {
 interface AuthContextType {
   user: any;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<any>;
   signUp: (email: string, password: string, fullName: string) => Promise<any>;
   signOut: () => Promise<void>;
@@ -28,6 +29,7 @@ interface AuthContextType {
   ) => Promise<any>;
   changePassword: (oldPassword: string, newPassword: string) => Promise<any>;
   getAuthToken: () => Promise<string | null>;
+  checkAdminStatus: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType>(null!);
@@ -35,6 +37,7 @@ const AuthContext = createContext<AuthContextType>(null!);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     checkCurrentUser();
@@ -42,13 +45,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkCurrentUser = async () => {
     try {
-      // const currentUser = await getCurrentUser();
       const userAttributes = await fetchUserAttributes();
       setUser(userAttributes);
       setIsAuthenticated(true);
+      await checkAdminStatus();
     } catch (error) {
       setUser(null);
       setIsAuthenticated(false);
+      setIsAdmin(false);
+    }
+  };
+
+  const checkAdminStatus = async (): Promise<boolean> => {
+    try {
+      const session = await fetchAuthSession();
+
+      if (!session.tokens?.idToken) {
+        setIsAdmin(false);
+        return false;
+      }
+
+      const payload = session.tokens.idToken.payload;
+      const userGroups = payload["cognito:groups"];
+      const isUserAdmin = Array.isArray(userGroups) && userGroups.includes("ADMIN");
+
+      setIsAdmin(isUserAdmin);
+      return isUserAdmin;
+    } catch (error) {
+      setIsAdmin(false);
+      return false;
     }
   };
 
@@ -57,7 +82,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { idToken } = (await fetchAuthSession()).tokens ?? {};
       return idToken?.toString() || null;
     } catch (error) {
-      console.error("Error fetching auth token:", error);
       return null;
     }
   };
@@ -71,6 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userAttributes = await fetchUserAttributes();
       setUser(userAttributes);
       setIsAuthenticated(true);
+      await checkAdminStatus();
       return userAttributes;
     }
     return nextStep;
@@ -94,7 +119,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       });
     } catch (error) {
-      console.error("Sign-up error:", error);
       throw error;
     }
   };
@@ -108,7 +132,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const handleResendConfirmationCode = async (email: string) => {
     return await resendSignUpCode({
-      // Updated function name
       username: email,
     });
   };
@@ -117,11 +140,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signOut();
     setUser(null);
     setIsAuthenticated(false);
+    setIsAdmin(false);
   };
 
   const handleForgotPassword = async (email: string) => {
     return await resetPassword({
-      // Updated function name
       username: email,
     });
   };
@@ -153,6 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         isAuthenticated,
+        isAdmin,
         signIn: handleSignIn,
         signUp: handleSignUp,
         signOut: handleSignOut,
@@ -162,6 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         forgotPasswordSubmit: handleForgotPasswordSubmit,
         changePassword: handleChangePassword,
         getAuthToken,
+        checkAdminStatus,
       }}
     >
       {children}

@@ -1,8 +1,10 @@
 import { createBrowserRouter, Navigate, RouteObject } from "react-router-dom";
 import publicRoutes from "@/routes/publicRoutes";
+import privateRoutes from "@/routes/privateRoutes";
+import adminRoutes from "@/routes/adminRoutes";
 import Layout from "@/components/layout/Layout";
 import NotFound from "@/pages/error/NotFound";
-import privateRoutes from "@/routes/privateRoutes";
+import Unauthorized from "@/components/unauthorized/Unauthorized";
 
 const routes: RouteObject[] = [
   {
@@ -12,6 +14,11 @@ const routes: RouteObject[] = [
     children: [
       ...publicRoutes,
       ...privateRoutes,
+      ...adminRoutes,
+      {
+        path: "unauthorized",
+        element: <Unauthorized />,
+      },
       {
         path: "*",
         element: <Navigate to="/login" replace />,

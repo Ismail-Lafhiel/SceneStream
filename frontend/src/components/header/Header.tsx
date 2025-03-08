@@ -1,6 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  FaPlay,
   FaSearch,
   FaSun,
   FaMoon,
@@ -39,7 +38,7 @@ const useClickOutside = (handler: () => void) => {
 
 const Header = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
-  const { isAuthenticated, user, signOut } = useAuth();
+  const { isAuthenticated, user, isAdmin, signOut } = useAuth(); // Add isAdmin from AuthContext
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -113,7 +112,13 @@ const Header = () => {
               {/* Main Text */}
               <h1 className="relative text-3xl font-black tracking-tight">
                 {/* First part of text with Netflix-style gradient */}
-                <span className={`bg-gradient-to-b bg-clip-text text-transparent transition-all duration-300 ${isDarkMode ? "from-white to-gray-300 group-hover:from-white" : "from-gray-900 to-gray-600 group-hover:from-gray-900"}`}>
+                <span
+                  className={`bg-gradient-to-b bg-clip-text text-transparent transition-all duration-300 ${
+                    isDarkMode
+                      ? "from-white to-gray-300 group-hover:from-white"
+                      : "from-gray-900 to-gray-600 group-hover:from-gray-900"
+                  }`}
+                >
                   Scene
                 </span>
                 {/* Second part of text */}
@@ -196,20 +201,35 @@ const Header = () => {
                       >
                         Your Profile
                       </Link>
-                      <Link
-                        to="/bookmarks"
-                        className={`block px-4 py-2 text-sm transition-colors ${
-                          isDarkMode
-                            ? "text-gray-200 hover:bg-gray-700/50"
-                            : "text-gray-700 hover:bg-gray-100/50"
-                        }`}
-                        onClick={() => setIsProfileMenuOpen(false)}
-                      >
-                        Bookmarks
-                      </Link>
+                      {/* Conditionally render Dashboard or Bookmarks link */}
+                      {isAdmin ? (
+                        <Link
+                          to="/admin"
+                          className={`block px-4 py-2 text-sm transition-colors ${
+                            isDarkMode
+                              ? "text-gray-200 hover:bg-gray-700/50"
+                              : "text-gray-700 hover:bg-gray-100/50"
+                          }`}
+                          onClick={() => setIsProfileMenuOpen(false)}
+                        >
+                          Dashboard
+                        </Link>
+                      ) : (
+                        <Link
+                          to="/bookmarks"
+                          className={`block px-4 py-2 text-sm transition-colors ${
+                            isDarkMode
+                              ? "text-gray-200 hover:bg-gray-700/50"
+                              : "text-gray-700 hover:bg-gray-100/50"
+                          }`}
+                          onClick={() => setIsProfileMenuOpen(false)}
+                        >
+                          Bookmarks
+                        </Link>
+                      )}
                       <button
                         onClick={handleSignOut}
-                        className={`block w-full text-left px-4 py-2 text-sm transition-colors ${
+                        className={`block w-full cursor-pointer text-left px-4 py-2 text-sm transition-colors ${
                           isDarkMode
                             ? "text-gray-200 hover:bg-gray-700/50"
                             : "text-gray-700 hover:bg-gray-100/50"
@@ -340,17 +360,32 @@ const Header = () => {
                     >
                       Your Profile
                     </Link>
-                    <Link
-                      to="/settings"
-                      className={`block px-4 py-2 rounded-full text-base font-medium transition-all duration-300 ${
-                        isDarkMode
-                          ? "text-gray-200 hover:bg-gray-800/50"
-                          : "text-gray-700 hover:bg-gray-100/50"
-                      }`}
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Settings
-                    </Link>
+                    {/* Conditionally render Dashboard or Bookmarks link */}
+                    {isAdmin ? (
+                      <Link
+                        to="/admin"
+                        className={`block px-4 py-2 rounded-full text-base font-medium transition-all duration-300 ${
+                          isDarkMode
+                            ? "text-gray-200 hover:bg-gray-800/50"
+                            : "text-gray-700 hover:bg-gray-100/50"
+                        }`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Dashboard
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/bookmarks"
+                        className={`block px-4 py-2 rounded-full text-base font-medium transition-all duration-300 ${
+                          isDarkMode
+                            ? "text-gray-200 hover:bg-gray-800/50"
+                            : "text-gray-700 hover:bg-gray-100/50"
+                        }`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Bookmarks
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         handleSignOut();
