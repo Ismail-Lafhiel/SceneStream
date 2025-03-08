@@ -8,7 +8,7 @@ const adminRoutes = [
     element: <AdminGuard />,
     children: [
       {
-        path: "/admin",
+        path: "dashboard",
         element: <Dashboard />,
       },
     ],

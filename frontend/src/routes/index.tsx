@@ -3,6 +3,7 @@ import publicRoutes from "@/routes/publicRoutes";
 import privateRoutes from "@/routes/privateRoutes";
 import adminRoutes from "@/routes/adminRoutes";
 import Layout from "@/components/layout/Layout";
+import AdminLayout from "@/components/layout/AdminLayout";
 import NotFound from "@/pages/error/NotFound";
 import Unauthorized from "@/components/unauthorized/Unauthorized";
 
@@ -14,7 +15,6 @@ const routes: RouteObject[] = [
     children: [
       ...publicRoutes,
       ...privateRoutes,
-      ...adminRoutes,
       {
         path: "unauthorized",
         element: <Unauthorized />,
@@ -23,6 +23,13 @@ const routes: RouteObject[] = [
         path: "*",
         element: <Navigate to="/login" replace />,
       },
+    ],
+  },
+  {
+    path: "/admin",
+    element: <AdminLayout />,
+    children: [
+      ...adminRoutes,
     ],
   },
 ];
