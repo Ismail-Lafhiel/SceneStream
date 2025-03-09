@@ -89,10 +89,10 @@ const AdminSidebar = () => {
       >
         <div className="flex items-center space-x-3">
           <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-            <span className="text-lg font-bold text-white">M</span>
+            <span className="text-lg font-bold text-white">S</span>
           </div>
           <span className="text-xl font-bold tracking-tight text-white">
-            MovieRater
+            SceneStream
           </span>
         </div>
       </div>
