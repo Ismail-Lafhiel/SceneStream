@@ -38,7 +38,6 @@ const AdminSidebar = () => {
       icon: <FaUsers />,
       subItems: [
         { path: "/admin/users", label: "All Users" },
-        { path: "/admin/users/activity", label: "User Activity" },
         { path: "/admin/users/reviews", label: "User Reviews" },
       ],
     },
@@ -77,7 +76,7 @@ const AdminSidebar = () => {
     <aside
       className={`w-64 h-screen overflow-y-auto flex-shrink-0 transition-all duration-300 ${
         isDarkMode
-          ? "bg-gray-900 text-gray-300 border-r border-gray-700"
+          ? "bg-gray-800 text-gray-300 border-r border-gray-700"
           : "bg-gray-800 text-white border-r border-gray-700"
       }`}
     >

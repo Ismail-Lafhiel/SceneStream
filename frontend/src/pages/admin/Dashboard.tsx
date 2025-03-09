@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   FaUsers,
   FaFilm,
@@ -8,8 +8,6 @@ import {
   FaRegClock,
   FaFire,
   FaCalendar,
-  FaMoon,
-  FaSun,
 } from "react-icons/fa";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 
