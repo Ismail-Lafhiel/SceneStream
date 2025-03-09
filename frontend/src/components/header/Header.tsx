@@ -204,7 +204,7 @@ const Header = () => {
                       {/* Conditionally render Dashboard or Bookmarks link */}
                       {isAdmin ? (
                         <Link
-                          to="/admin"
+                          to="/admin/dashboard"
                           className={`block px-4 py-2 text-sm transition-colors ${
                             isDarkMode
                               ? "text-gray-200 hover:bg-gray-700/50"
