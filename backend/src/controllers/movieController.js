@@ -1,11 +1,11 @@
-const catchAsync = require('../utils/catchAsync');
-const tmdbService = require('../services/tmdbService');
+const catchAsync = require("../utils/catchAsync");
+const tmdbService = require("../services/tmdbService");
 
 /**
- * Fetch popular movies from TMDB API and store them in the database (public route).
+ * Fetch all movies from TMDB API and store them in the database (public route).
  */
-exports.getPopularMovies = catchAsync(async (req, res) => {
-  const movies = await tmdbService.fetchAndStorePopularMovies();
+exports.getAllMovies = catchAsync(async (req, res) => {
+  const movies = await tmdbService.fetchAllMovies();
   res.json(movies);
 });
 
@@ -14,5 +14,13 @@ exports.getPopularMovies = catchAsync(async (req, res) => {
  */
 exports.getMoviesFromDB = catchAsync(async (req, res) => {
   const movies = await tmdbService.getMoviesFromDB();
+  res.json(movies);
+});
+
+/**
+ * Fetch popular movies from TMDB API and store them in the database (public route).
+ */
+exports.getPopularMovies = catchAsync(async (req, res) => {
+  const movies = await tmdbService.fetchAndStorePopularMovies();
   res.json(movies);
 });

@@ -11,4 +11,5 @@ module.exports = {
     clientId: process.env.COGNITO_CLIENT_ID,
   },
   TMDB_API_KEY: process.env.TMDB_API_KEY,
+  TMDB_BASE_URL: process.env.TMDB_BASE_URL,
 };

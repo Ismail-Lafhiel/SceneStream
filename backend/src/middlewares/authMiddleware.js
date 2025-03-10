@@ -48,7 +48,7 @@ exports.checkAdminGroup = catchAsync(async (req, res, next) => {
     return next(
       new ApiError(
         403,
-        "Forbidden: You must be in the ADMIN group to access this resource."
+        "Forbidden"
       )
     );
   }
