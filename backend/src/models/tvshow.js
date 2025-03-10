@@ -1,10 +1,9 @@
-// models/TVShow.js
 const mongoose = require('mongoose');
 
 const tvShowSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
   name: { type: String, required: true },
-  overview: { type: String, required: true },
+  overview: { type: String, default: '' },
   backdrop_path: { type: String, required: true },
   poster_path: { type: String, required: true },
   first_air_date: { type: String, required: true },
