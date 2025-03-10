@@ -1,15 +1,15 @@
-const express = require('express');
-const tvShowController = require('../controllers/tvShowController');
+const express = require("express");
+const tvShowController = require("../controllers/tvShowController");
 
 const router = express.Router();
 
-// Public route: Fetch popular TV shows
-router.get('/', tvShowController.getAllTVShows);
-router.get('/popular', tvShowController.getPopularTVShows);
-
-// Admin-only route: Fetch popular TV shows
-router.get('/', tvShowController.getTVShowsFromDB);
-
-
+router.get("/popular", tvShowController.getPopularTvShows);
+router.get("/top-rated", tvShowController.getTopRatedTvShows);
+router.get("/on-air", tvShowController.getOnAirTvShows);
+router.get("/upcoming", tvShowController.getUpcomingTvShows);
+router.get("/:tvId/videos", tvShowController.getTvShowVideos);
+router.get("/:tvId", tvShowController.getTvShowDetails);
+router.get("/:tvId/similar", tvShowController.getSimilarTvShows);
+router.get("/discover", tvShowController.discoverTvShows);
 
 module.exports = router;

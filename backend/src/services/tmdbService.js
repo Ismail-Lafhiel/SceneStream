@@ -1,245 +1,299 @@
 const axios = require("axios");
 const { ApiError } = require("../utils/errors");
+const config = require("../config/config");
+const Genre = require("../models/Genre");
 const Movie = require("../models/movie");
 const TVShow = require("../models/tvshow");
-const config = require("../config/config");
 
 const TMDB_API_KEY = config.TMDB_API_KEY;
 const TMDB_BASE_URL = config.TMDB_BASE_URL;
 
-/**
- * Fetch all movies from TMDB API and store them in the database.
- * Fetches 30 movies per page by combining results from multiple TMDB pages.
- */
-exports.fetchAllMovies = async () => {
+// Helper function to make TMDB API requests
+const makeTmdbRequest = async (endpoint, params = {}) => {
   try {
-    let page = 1;
-    let allMovies = [];
-    const moviesPerPage = 30; // Number of movies to fetch per "page"
-
-    // Fetch movies in chunks of 30 per page
-    while (true) {
-      const url = `${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&page=${page}`;
-      const response = await axios.get(url);
-      const movies = response.data.results;
-
-      if (movies.length === 0) {
-        break; // No more movies to fetch
-      }
-
-      // Add movies to the list
-      allMovies = allMovies.concat(movies);
-
-      // Stop if we've fetched enough movies for the current "page"
-      if (allMovies.length >= moviesPerPage) {
-        break;
-      }
-
-      page++;
-    }
-
-    // Sync movies with the database
-    for (const movieData of allMovies.slice(0, moviesPerPage)) {
-      // Ensure required fields are present
-      const movieToSave = {
-        id: movieData.id,
-        title: movieData.title || "Unknown Title",
-        overview: movieData.overview || "",
-        backdrop_path: movieData.backdrop_path || "",
-        poster_path: movieData.poster_path || "",
-        release_date: movieData.release_date || "1970-01-01",
-        vote_average: movieData.vote_average || 0,
-        vote_count: movieData.vote_count || 0,
-        genre_ids: movieData.genre_ids || [],
-      };
-
-      // Check if the movie already exists in the database
-      let movie = await Movie.findOne({ id: movieData.id });
-
-      if (!movie) {
-        // Create a new movie if it doesn't exist
-        movie = new Movie(movieToSave);
-        await movie.save();
-      } else {
-        // Update the movie if it already exists
-        movie.set(movieToSave);
-        await movie.save();
-      }
-    }
-
-    return allMovies.slice(0, moviesPerPage); // Return only 30 movies per "page"
+    const url = `${TMDB_BASE_URL}${endpoint}`;
+    const response = await axios.get(url, {
+      params: {
+        api_key: TMDB_API_KEY,
+        ...params,
+      },
+    });
+    return response.data;
   } catch (error) {
-    console.error("Error fetching and storing all movies from TMDB:", error);
-    throw new ApiError(500, "Failed to fetch and store all movies from TMDB");
+    console.error(`Error fetching data from TMDB API (${endpoint}):`, error);
+    throw new ApiError(500, `Failed to fetch data from TMDB API (${endpoint})`);
   }
 };
 
-/**
- * Fetch all TV shows from TMDB API and store them in the database.
- * Fetches 30 TV shows per page by combining results from multiple TMDB pages.
- */
-exports.fetchAllTVShows = async () => {
-  try {
-    let page = 1;
-    let allTVShows = [];
-    const tvShowsPerPage = 30; // Number of TV shows to fetch per "page"
+// Helper function to save or update a movie in the database
+const saveOrUpdateMovie = async (movieData) => {
+  let movie = await Movie.findOne({ id: movieData.id });
 
-    // Fetch TV shows in chunks of 30 per page
-    while (true) {
-      const url = `${TMDB_BASE_URL}/tv/popular?api_key=${TMDB_API_KEY}&page=${page}`;
-      const response = await axios.get(url);
-      const tvShows = response.data.results;
+  if (!movie) {
+    movie = new Movie(movieData);
+  } else {
+    movie.set(movieData);
+  }
 
-      if (tvShows.length === 0) {
-        break; // No more TV shows to fetch
-      }
+  await movie.save();
+  return movie;
+};
 
-      // Add TV shows to the list
-      allTVShows = allTVShows.concat(tvShows);
+// Helper function to save or update a TV show in the database
+const saveOrUpdateTVShow = async (tvShowData) => {
+  let tvShow = await TVShow.findOne({ id: tvShowData.id });
 
-      // Stop if we've fetched enough TV shows for the current "page"
-      if (allTVShows.length >= tvShowsPerPage) {
-        break;
-      }
+  if (!tvShow) {
+    tvShow = new TVShow(tvShowData);
+  } else {
+    tvShow.set(tvShowData);
+  }
 
-      page++;
+  await tvShow.save();
+  return tvShow;
+};
+
+// Helper function to save or update genres in the database
+const saveOrUpdateGenres = async (genres, type = "movie") => {
+  for (const genreData of genres) {
+    let genre = await Genre.findOne({ id: genreData.id, type });
+
+    if (!genre) {
+      genre = new Genre({ ...genreData, type });
+    } else {
+      genre.set(genreData);
     }
 
-    // Sync TV shows with the database
-    for (const tvShowData of allTVShows.slice(0, tvShowsPerPage)) {
-      // Ensure required fields are present
-      const tvShowToSave = {
-        id: tvShowData.id,
-        name: tvShowData.name || "Unknown Title",
-        overview: tvShowData.overview || "",
-        backdrop_path: tvShowData.backdrop_path || "",
-        poster_path: tvShowData.poster_path || "",
-        first_air_date: tvShowData.first_air_date || "1970-01-01",
-        vote_average: tvShowData.vote_average || 0,
-        vote_count: tvShowData.vote_count || 0,
-        genre_ids: tvShowData.genre_ids || [],
-      };
-
-      // Check if the TV show already exists in the database
-      let tvShow = await TVShow.findOne({ id: tvShowData.id });
-
-      if (!tvShow) {
-        // Create a new TV show if it doesn't exist
-        tvShow = new TVShow(tvShowToSave);
-        await tvShow.save();
-      } else {
-        // Update the TV show if it already exists
-        tvShow.set(tvShowToSave);
-        await tvShow.save();
-      }
-    }
-
-    return allTVShows.slice(0, tvShowsPerPage); // Return only 30 TV shows per "page"
-  } catch (error) {
-    console.error("Error fetching and storing all TV shows from TMDB:", error);
-    throw new ApiError(500, "Failed to fetch and store all TV shows from TMDB");
+    await genre.save();
   }
 };
 
-/**
- * Fetch movies from the database.
- */
-exports.getMoviesFromDB = async () => {
-  try {
-    const movies = await Movie.find({});
-    return movies;
-  } catch (error) {
-    console.error("Error fetching movies from the database:", error);
-    throw new ApiError(500, "Failed to fetch movies from the database");
+// Movies
+exports.getPopularMovies = async (page = 1) => {
+  const data = await makeTmdbRequest("/movie/popular", { page });
+
+  // Save movies to the database
+  for (const movie of data.results) {
+    await saveOrUpdateMovie(movie);
   }
+
+  return data;
 };
 
-/**
- * Fetch TV shows from the database.
- */
-exports.getTVShowsFromDB = async () => {
-  try {
-    const tvShows = await TVShow.find({});
-    return tvShows;
-  } catch (error) {
-    console.error("Error fetching TV shows from the database:", error);
-    throw new ApiError(500, "Failed to fetch TV shows from the database");
+exports.getTrendingMovies = async (timeWindow = "week") => {
+  const data = await makeTmdbRequest(`/trending/movie/${timeWindow}`);
+
+  // Save movies to the database
+  for (const movie of data.results) {
+    await saveOrUpdateMovie(movie);
   }
+
+  return data;
 };
 
-/**
- * Fetch popular movies from TMDB API and store them in the database.
- */
-exports.fetchAndStorePopularMovies = async () => {
-  try {
-    const url = `${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}`;
-    const response = await axios.get(url);
-    const movies = response.data.results;
+exports.getMoviesByGenre = async (genreId, page = 1) => {
+  const data = await makeTmdbRequest("/discover/movie", {
+    with_genres: genreId,
+    page,
+  });
 
-    // Sync movies with the database
-    for (const movieData of movies) {
-      // Check if the movie already exists in the database
-      let movie = await Movie.findOne({ id: movieData.id });
-
-      if (!movie) {
-        // Create a new movie if it doesn't exist
-        movie = new Movie(movieData);
-        await movie.save();
-      } else {
-        // Update the movie if it already exists
-        movie.set(movieData);
-        await movie.save();
-      }
-    }
-
-    return movies;
-  } catch (error) {
-    console.error("Error fetching and storing movies from TMDB:", error);
-    throw new ApiError(500, "Failed to fetch and store movies from TMDB");
+  // Save movies to the database
+  for (const movie of data.results) {
+    await saveOrUpdateMovie(movie);
   }
+
+  return data;
 };
 
-/**
- * Fetch popular TV shows from TMDB API and store them in the database.
- */
-exports.fetchAndStorePopularTVShows = async () => {
-  try {
-    const url = `${TMDB_BASE_URL}/tv/popular?api_key=${TMDB_API_KEY}`;
-    const response = await axios.get(url);
-    const tvShows = response.data.results;
+exports.getGenres = async () => {
+  const data = await makeTmdbRequest("/genre/movie/list");
 
-    // Sync TV shows with the database
-    for (const tvShowData of tvShows) {
-      // Ensure required fields are present
-      const tvShowToSave = {
-        id: tvShowData.id,
-        name: tvShowData.name || "Unknown Title",
-        overview: tvShowData.overview || "",
-        backdrop_path: tvShowData.backdrop_path || "",
-        poster_path: tvShowData.poster_path || "",
-        first_air_date: tvShowData.first_air_date || "1970-01-01",
-        vote_average: tvShowData.vote_average || 0,
-        vote_count: tvShowData.vote_count || 0,
-        genre_ids: tvShowData.genre_ids || [],
-      };
+  // Save genres to the database
+  await saveOrUpdateGenres(data.genres, "movie");
 
-      // Check if the TV show already exists in the database
-      let tvShow = await TVShow.findOne({ id: tvShowData.id });
+  return data.genres;
+};
 
-      if (!tvShow) {
-        // Create a new TV show if it doesn't exist
-        tvShow = new TVShow(tvShowToSave);
-        await tvShow.save();
-      } else {
-        // Update the TV show if it already exists
-        tvShow.set(tvShowToSave);
-        await tvShow.save();
-      }
-    }
+exports.getNewReleases = async (page = 1) => {
+  const data = await makeTmdbRequest("/movie/now_playing", { page });
 
-    return tvShows;
-  } catch (error) {
-    console.error("Error fetching and storing TV shows from TMDB:", error);
-    throw new ApiError(500, "Failed to fetch and store TV shows from TMDB");
+  // Save movies to the database
+  for (const movie of data.results) {
+    await saveOrUpdateMovie(movie);
   }
+
+  return data;
+};
+
+exports.getMovieDetails = async (movieId) => {
+  const data = await makeTmdbRequest(`/movie/${movieId}`, {
+    append_to_response: "credits,videos",
+  });
+
+  // Save movie details to the database
+  await saveOrUpdateMovie(data);
+
+  return data;
+};
+
+exports.getSimilarMovies = async (movieId) => {
+  const data = await makeTmdbRequest(`/movie/${movieId}/similar`);
+
+  // Save similar movies to the database
+  for (const movie of data.results) {
+    await saveOrUpdateMovie(movie);
+  }
+
+  return data;
+};
+
+exports.getTopRatedMovies = async (page = 1) => {
+  const data = await makeTmdbRequest("/movie/top_rated", { page });
+
+  // Save movies to the database
+  for (const movie of data.results) {
+    await saveOrUpdateMovie(movie);
+  }
+
+  return data;
+};
+
+exports.getNowPlayingMovies = async (page = 1) => {
+  const data = await makeTmdbRequest("/movie/now_playing", { page });
+
+  // Save movies to the database
+  for (const movie of data.results) {
+    await saveOrUpdateMovie(movie);
+  }
+
+  return data;
+};
+
+exports.getUpcomingMovies = async (page = 1) => {
+  const data = await makeTmdbRequest("/movie/upcoming", { page });
+
+  // Save movies to the database
+  for (const movie of data.results) {
+    await saveOrUpdateMovie(movie);
+  }
+
+  return data;
+};
+
+exports.getMovieVideos = async (movieId) => {
+  return makeTmdbRequest(`/movie/${movieId}/videos`);
+};
+
+exports.discoverMovies = async ({ page = 1, with_genres, sort_by = "popularity.desc", search }) => {
+  const endpoint = search ? "/search/movie" : "/discover/movie";
+  const data = await makeTmdbRequest(endpoint, {
+    page,
+    with_genres,
+    sort_by,
+    query: search,
+  });
+
+  // Save discovered movies to the database
+  for (const movie of data.results) {
+    await saveOrUpdateMovie(movie);
+  }
+
+  return data;
+};
+
+// TV Shows
+exports.getPopularTvShows = async (page = 1) => {
+  const data = await makeTmdbRequest("/tv/popular", { page });
+
+  // Save TV shows to the database
+  for (const tvShow of data.results) {
+    await saveOrUpdateTVShow(tvShow);
+  }
+
+  return data;
+};
+
+exports.getTopRatedTvShows = async (page = 1) => {
+  const data = await makeTmdbRequest("/tv/top_rated", { page });
+
+  // Save TV shows to the database
+  for (const tvShow of data.results) {
+    await saveOrUpdateTVShow(tvShow);
+  }
+
+  return data;
+};
+
+exports.getOnAirTvShows = async (page = 1) => {
+  const data = await makeTmdbRequest("/tv/on_the_air", { page });
+
+  // Save TV shows to the database
+  for (const tvShow of data.results) {
+    await saveOrUpdateTVShow(tvShow);
+  }
+
+  return data;
+};
+
+exports.getUpcomingTvShows = async (page = 1) => {
+  const data = await makeTmdbRequest("/tv/airing_today", { page });
+
+  // Save TV shows to the database
+  for (const tvShow of data.results) {
+    await saveOrUpdateTVShow(tvShow);
+  }
+
+  return data;
+};
+
+exports.getTvGenres = async () => {
+  const data = await makeTmdbRequest("/genre/tv/list");
+
+  // Save TV genres to the database
+  await saveOrUpdateGenres(data.genres, "tv");
+
+  return data.genres;
+};
+
+exports.getTvShowVideos = async (tvId) => {
+  return makeTmdbRequest(`/tv/${tvId}/videos`);
+};
+
+exports.getTvShowDetails = async (tvId) => {
+  const data = await makeTmdbRequest(`/tv/${tvId}`, {
+    append_to_response: "credits,videos",
+  });
+
+  // Save TV show details to the database
+  await saveOrUpdateTVShow(data);
+
+  return data;
+};
+
+exports.getSimilarTvShows = async (tvId) => {
+  const data = await makeTmdbRequest(`/tv/${tvId}/similar`);
+
+  // Save similar TV shows to the database
+  for (const tvShow of data.results) {
+    await saveOrUpdateTVShow(tvShow);
+  }
+
+  return data;
+};
+
+exports.discoverTvShows = async ({ page = 1, with_genres, sort_by = "popularity.desc", search }) => {
+  const endpoint = search ? "/search/tv" : "/discover/tv";
+  const data = await makeTmdbRequest(endpoint, {
+    page,
+    with_genres,
+    sort_by,
+    query: search,
+  });
+
+  // Save discovered TV shows to the database
+  for (const tvShow of data.results) {
+    await saveOrUpdateTVShow(tvShow);
+  }
+
+  return data;
 };

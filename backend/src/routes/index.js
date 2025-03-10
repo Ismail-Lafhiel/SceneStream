@@ -16,7 +16,5 @@ router.use('/bookmarks', authMiddleware.protect, bookmarkRoutes); // Bookmark ro
 
 // Admin routes (require authentication and admin access)
 router.use('/admin', authMiddleware.protect, authMiddleware.checkAdminGroup, userRoutes); // Admin user routes
-router.use('/admin/movies', authMiddleware.protect, authMiddleware.checkAdminGroup, movieRoutes); // Admin movie routes
-router.use('/admin/tvshows', authMiddleware.protect, authMiddleware.checkAdminGroup, tvShowRoutes); // Admin TV show routes
 
 module.exports = router;
