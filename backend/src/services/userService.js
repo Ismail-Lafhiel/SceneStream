@@ -1,11 +1,19 @@
-// services/userService.js
-const { CognitoIdentityServiceProvider } = require("aws-sdk");
+const {
+  CognitoIdentityProviderClient,
+  ListUsersCommand,
+  AdminListGroupsForUserCommand,
+} = require("@aws-sdk/client-cognito-identity-provider");
 const config = require("../config/config");
 const { ApiError } = require("../utils/errors");
 const User = require("../models/user");
 
-const cognito = new CognitoIdentityServiceProvider({
+// Initialize the Cognito client
+const client = new CognitoIdentityProviderClient({
   region: config.aws.region,
+  credentials: {
+    accessKeyId: config.aws.accessKeyId,
+    secretAccessKey: config.aws.secretAccessKey,
+  },
 });
 
 /**
@@ -18,6 +26,8 @@ exports.syncUsersFromCognito = async () => {
       Limit: 60, // Adjust the limit as needed
     };
 
+    console.log("Fetching users from Cognito with params:", params);
+
     let users = [];
     let paginationToken = null;
 
@@ -26,7 +36,9 @@ exports.syncUsersFromCognito = async () => {
         params.PaginationToken = paginationToken;
       }
 
-      const result = await cognito.listUsers(params).promise();
+      // Fetch users from Cognito
+      const command = new ListUsersCommand(params);
+      const result = await client.send(command);
 
       // Process users and ensure they're in our database
       for (const cognitoUser of result.Users) {
@@ -46,9 +58,8 @@ exports.syncUsersFromCognito = async () => {
           UserPoolId: config.aws.userPoolId,
           Username: cognitoUser.Username,
         };
-        const groupsResult = await cognito
-          .adminListGroupsForUser(groupsParams)
-          .promise();
+        const groupsCommand = new AdminListGroupsForUserCommand(groupsParams);
+        const groupsResult = await client.send(groupsCommand);
         const groups = groupsResult.Groups.map((group) => group.GroupName);
 
         // Find or create user in our database
@@ -85,7 +96,11 @@ exports.syncUsersFromCognito = async () => {
 
     return users;
   } catch (error) {
-    console.error("Error syncing users from Cognito:", error);
+    console.error("Cognito Error:", {
+      code: error.code,
+      message: error.message,
+      stack: error.stack,
+    });
     throw new ApiError(500, "Failed to sync users from Cognito");
   }
 };
