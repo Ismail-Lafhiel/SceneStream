@@ -12,74 +12,19 @@ const movieSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    original_title: {
-      type: String,
-      trim: true,
-    },
     overview: {
       type: String,
       trim: true,
     },
-    poster_path: String,
     backdrop_path: String,
-    genre_ids: [Number],
-    genres: [
-      {
-        id: Number,
-        name: String,
-      },
-    ],
+    poster_path: String,
     release_date: String,
-    popularity: Number,
     vote_average: Number,
     vote_count: Number,
-    adult: Boolean,
-    original_language: String,
-    video: Boolean,
-    credits: {
-      cast: [
-        {
-          id: Number,
-          name: String,
-          character: String,
-          profile_path: String,
-          order: Number,
-        },
-      ],
-      crew: [
-        {
-          id: Number,
-          name: String,
-          job: String,
-          department: String,
-          profile_path: String,
-        },
-      ],
+    genre_ids: {
+      type: [Number],
+      default: [],
     },
-    videos: {
-      results: [
-        {
-          id: String,
-          key: String,
-          name: String,
-          site: String,
-          type: String,
-        },
-      ],
-    },
-    runtime: Number,
-    budget: Number,
-    revenue: Number,
-    status: String,
-    tagline: String,
-    production_companies: [
-      {
-        id: Number,
-        name: String,
-        logo_path: String,
-        origin_country: String,
-      },
-    ],
   },
   {
     timestamps: true,
@@ -101,7 +46,6 @@ movieSchema.virtual("release_year").get(function () {
 // Index for faster searches
 movieSchema.index({ title: "text", overview: "text" });
 movieSchema.index({ genre_ids: 1 });
-movieSchema.index({ popularity: -1 });
 movieSchema.index({ vote_average: -1 });
 movieSchema.index({ release_date: -1 });
 

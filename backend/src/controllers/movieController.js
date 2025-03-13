@@ -80,16 +80,21 @@ exports.discoverMovies = catchAsync(async (req, res) => {
 exports.createMovie = catchAsync(async (req, res) => {
   const movieData = req.body;
 
-  // Check if movie with this ID already exists
-  const existingMovie = await Movie.findOne({ id: movieData.id });
-  if (existingMovie) {
-    return res.status(400).json({
-      message:
-        "Movie with this ID already exists. Use update endpoint instead.",
-    });
+  // Parse genre_ids into an array of numbers
+  if (movieData.genre_ids) {
+    if (typeof movieData.genre_ids === "string") {
+      movieData.genre_ids = JSON.parse(movieData.genre_ids); // Parse stringified array
+    }
+    movieData.genre_ids = movieData.genre_ids.map((id) => Number(id)); // Ensure all IDs are numbers
   }
 
-  // Create movie with uploaded image paths (if any)
+  // Auto-generate ID if not provided
+  if (!movieData.id) {
+    const highestMovie = await Movie.findOne().sort({ id: -1 });
+    movieData.id = highestMovie ? highestMovie.id + 1 : 1;
+  }
+
+  // Create the movie
   const movie = await Movie.create(movieData);
   res.status(201).json(movie);
 });

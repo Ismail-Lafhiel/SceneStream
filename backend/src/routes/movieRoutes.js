@@ -26,10 +26,10 @@ router.use(authMiddleware.protect, authMiddleware.checkAdminGroup);
 router.get("/", movieController.getAllMovies);
 router.post(
   "/",
-  validationMiddleware.validateMovieData,
-  uploadMovieImages,
-  processImageUploads,
-  movieController.createMovie
+  uploadMovieImages, // Handle file uploads first
+  processImageUploads, // Process uploaded files
+  validationMiddleware.validateMovieData, // Validate the data
+  movieController.createMovie // Create the movie
 );
 router.patch(
   "/:movieId",

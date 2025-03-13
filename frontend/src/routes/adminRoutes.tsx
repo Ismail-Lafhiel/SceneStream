@@ -2,7 +2,8 @@ import AdminGuard from "@/guards/AdminGuard";
 
 // pages
 import Dashboard from "@/pages/admin/Dashboard";
-import Users from "@/pages/admin/Users";
+import CreateMovie from "@/pages/admin/movies/CreateMovie";
+import Users from "@/pages/admin/users/Users";
 
 const adminRoutes = [
   {
@@ -15,6 +16,10 @@ const adminRoutes = [
       {
         path: "users",
         element: <Users />,
+      },
+      {
+        path: "movies/create",
+        element: <CreateMovie  />,
       },
     ],
   },

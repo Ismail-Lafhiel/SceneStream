@@ -67,10 +67,23 @@ exports.getMovieDetails = async (movieId) => {
     append_to_response: "credits,videos",
   });
 
-  // Save movie details to the database
-  await saveOrUpdateMovie(data);
+  // Map TMDB data to IMovie interface
+  const movieData = {
+    id: data.id,
+    title: data.title,
+    overview: data.overview,
+    backdrop_path: data.backdrop_path,
+    poster_path: data.poster_path,
+    release_date: data.release_date,
+    vote_average: data.vote_average,
+    vote_count: data.vote_count,
+    genre_ids: data.genres.map((genre) => genre.id),
+  };
 
-  return data;
+  // Save movie details to the database
+  await saveOrUpdateMovie(movieData);
+
+  return movieData;
 };
 
 exports.getSimilarMovies = async (movieId) => {
