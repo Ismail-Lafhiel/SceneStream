@@ -68,16 +68,21 @@ exports.discoverTvShows = catchAsync(async (req, res) => {
 exports.createTvShow = catchAsync(async (req, res) => {
   const tvShowData = req.body;
 
-  // Check if TV show with this ID already exists
-  const existingTvShow = await TVShow.findOne({ id: tvShowData.id });
-  if (existingTvShow) {
-    return res.status(400).json({
-      message:
-        "TV show with this ID already exists. Use update endpoint instead.",
-    });
+  // Parse genre_ids into an array of numbers
+  if (tvShowData.genre_ids) {
+    if (typeof tvShowData.genre_ids === "string") {
+      tvShowData.genre_ids = JSON.parse(tvShowData.genre_ids);
+    }
+    tvShowData.genre_ids = tvShowData.genre_ids.map((id) => Number(id));
   }
 
-  // Create TV show with uploaded image paths (if any)
+  // Auto-generate ID if not provided
+  if (!tvShowData.id) {
+    const highestTvShow = await TVShow.findOne().sort({ id: -1 });
+    tvShowData.id = highestTvShow ? highestTvShow.id + 1 : 1;
+  }
+
+  // Create the TV show
   const tvShow = await TVShow.create(tvShowData);
   res.status(201).json(tvShow);
 });
@@ -87,28 +92,24 @@ exports.updateTvShow = catchAsync(async (req, res) => {
   const { tvId } = req.params;
   const updateData = req.body;
 
-  // Find the existing TV show to check for images that might need to be deleted
-  const existingTvShow = await TVShow.findOne({ id: parseInt(tvId) });
-
-  if (!existingTvShow) {
-    return res.status(404).json({ message: "TV show not found" });
+  // Parse genre_ids into an array of numbers
+  if (updateData.genre_ids) {
+    if (typeof updateData.genre_ids === "string") {
+      updateData.genre_ids = JSON.parse(updateData.genre_ids);
+    }
+    updateData.genre_ids = updateData.genre_ids.map((id) => Number(id));
   }
 
-  // Handle deletion of old images if new ones are uploaded
-  if (updateData.poster_path && existingTvShow.poster_path) {
-    await deleteFromS3(existingTvShow.poster_path);
-  }
-
-  if (updateData.backdrop_path && existingTvShow.backdrop_path) {
-    await deleteFromS3(existingTvShow.backdrop_path);
-  }
-
-  // Update the TV show record
+  // Update the TV show
   const tvShow = await TVShow.findOneAndUpdate(
     { id: parseInt(tvId) },
     updateData,
     { new: true, runValidators: true }
   );
+
+  if (!tvShow) {
+    return res.status(404).json({ message: "TV show not found" });
+  }
 
   res.json(tvShow);
 });
@@ -121,15 +122,6 @@ exports.deleteTvShow = catchAsync(async (req, res) => {
 
   if (!tvShow) {
     return res.status(404).json({ message: "TV show not found" });
-  }
-
-  // Delete associated images from S3
-  if (tvShow.poster_path) {
-    await deleteFromS3(tvShow.poster_path);
-  }
-
-  if (tvShow.backdrop_path) {
-    await deleteFromS3(tvShow.backdrop_path);
   }
 
   res.status(204).send();

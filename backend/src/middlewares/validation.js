@@ -27,22 +27,43 @@ exports.validateMovieData = (req, res, next) => {
   next();
 };
 
-// Validate TV show data
 exports.validateTvShowData = (req, res, next) => {
-  const { id, name } = req.body;
+  console.log("Request Body:", req.body); // Log the request body
 
-  if (!id) {
-    return next(new ApiError(400, "TV show ID is required"));
-  }
+  const { name, first_air_date } = req.body;
 
+  // Required fields
   if (!name) {
     return next(new ApiError(400, "TV show name is required"));
   }
 
-  // Convert id to number if it's a string
-  if (typeof req.body.id === "string") {
+  if (!first_air_date) {
+    return next(new ApiError(400, "First air date is required"));
+  }
+
+  // Convert id to number if provided
+  if (req.body.id && typeof req.body.id === "string") {
     req.body.id = parseInt(req.body.id);
   }
+
+  // Convert genre_ids to an array of numbers if provided
+  if (req.body.genre_ids) {
+    if (typeof req.body.genre_ids === "string") {
+      try {
+        req.body.genre_ids = JSON.parse(req.body.genre_ids); // Parse stringified array
+      } catch (error) {
+        return next(new ApiError(400, "Invalid genre_ids format"));
+      }
+    }
+    if (!Array.isArray(req.body.genre_ids)) {
+      return next(new ApiError(400, "genre_ids must be an array"));
+    }
+    req.body.genre_ids = req.body.genre_ids.map((id) => Number(id)); // Ensure all IDs are numbers
+  }
+
+  // Set default values for optional fields
+  if (!req.body.vote_average) req.body.vote_average = 0;
+  if (!req.body.vote_count) req.body.vote_count = 0;
 
   next();
 };

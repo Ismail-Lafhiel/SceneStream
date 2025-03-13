@@ -80,6 +80,18 @@ const AdminHeader = () => {
             <span className="text-sm font-medium">Add Movie</span>
           </button>
         </Link>
+        <Link to="/admin/tvshows/create">
+          <button
+            className={`p-2 rounded-full hidden md:flex items-center space-x-2 ${
+              isDarkMode
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            } transition-colors`}
+          >
+            <FaFilm className="w-4 h-4" />
+            <span className="text-sm font-medium">Add Tvshow</span>
+          </button>
+        </Link>
 
         {/* Dark Mode Toggle */}
         <button

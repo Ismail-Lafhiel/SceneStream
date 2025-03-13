@@ -24,10 +24,10 @@ router.use(authMiddleware.protect, authMiddleware.checkAdminGroup);
 router.get("/", tvShowController.getAllTvShows);
 router.post(
   "/",
-  validationMiddleware.validateTvShowData,
-  uploadMovieImages,
-  processImageUploads,
-  tvShowController.createTvShow
+  uploadMovieImages, // Handle file uploads first
+  processImageUploads, // Process uploaded files
+  validationMiddleware.validateTvShowData, // Validate the data
+  tvShowController.createTvShow // Create the TV show
 );
 router.patch(
   "/:tvId",

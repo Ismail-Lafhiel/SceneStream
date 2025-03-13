@@ -69,7 +69,6 @@ exports.processImageUploads = async (req, res, next) => {
 
     // Process poster image if it exists
     if (req.files.poster_path && req.files.poster_path.length > 0) {
-      // Changed from 'poster' to 'poster_path'
       const posterUrl = await exports.uploadToS3(
         req.files.poster_path[0],
         "posters"
@@ -79,7 +78,6 @@ exports.processImageUploads = async (req, res, next) => {
 
     // Process backdrop image if it exists
     if (req.files.backdrop_path && req.files.backdrop_path.length > 0) {
-      // Changed from 'backdrop' to 'backdrop_path'
       const backdropUrl = await exports.uploadToS3(
         req.files.backdrop_path[0],
         "backdrops"
