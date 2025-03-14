@@ -16,3 +16,4 @@ export type TVShowDetails = Omit<ITVShow, "genre_ids"> & {
   status: string;
   tagline: string;
 };
+  

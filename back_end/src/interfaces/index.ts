@@ -1,0 +1,6 @@
+export * from "./movie.interface"
+export * from "./tvShow.interface"
+export * from "./genre.interface"
+export * from "./video.interface"
+export * from "./paginatedResponse.interface"
+export * from "./discoverParams.interface"

@@ -1,54 +1,119 @@
-const mongoose = require("mongoose");
+// src/models/tvshow.js
+const mongoose = require('mongoose');
 
-const tvShowSchema = new mongoose.Schema(
-  {
-    id: {
-      type: Number,
-      required: true,
-      unique: true,
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    overview: {
-      type: String,
-      trim: true,
-    },
-    backdrop_path: String,
-    poster_path: String,
-    first_air_date: String,
-    vote_average: Number,
-    vote_count: Number,
-    genre_ids: {
-      type: [Number],
-      default: [],
-    },
+const tvShowSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
   },
-  {
-    timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
+  originalName: {
+    type: String,
+    trim: true
+  },
+  tmdbId: {
+    type: Number,
+    sparse: true, 
+    index: true
+  },
+  overview: {
+    type: String,
+    trim: true
+  },
+  posterPath: {
+    type: String,
+    default: '/src/assets/images/default-poster.jpg'
+  },
+  backdropPath: {
+    type: String,
+    default: '/src/assets/images/default-backdrop.jpg'
+  },
+  firstAirDate: {
+    type: Date
+  },
+  lastAirDate: {
+    type: Date
+  },
+  numberOfSeasons: {
+    type: Number,
+    default: 0
+  },
+  numberOfEpisodes: {
+    type: Number,
+    default: 0
+  },
+  episodeRunTime: [{
+    type: Number
+  }],
+  voteAverage: {
+    type: Number,
+    default: 0
+  },
+  voteCount: {
+    type: Number,
+    default: 0
+  },
+  popularity: {
+    type: Number,
+    default: 0
+  },
+  genres: [{
+    type: Number,
+    ref: 'Genre'
+  }],
+  status: {
+    type: String,
+    enum: ['active', 'deleted', 'hidden'],
+    default: 'active'
+  },
+  isCustom: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
-);
-
-// Virtual field for calculating rating as a percentage
-tvShowSchema.virtual("rating_percentage").get(function () {
-  return this.vote_average * 10;
+}, { 
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
-// Virtual field for year
-tvShowSchema.virtual("first_air_year").get(function () {
-  return this.first_air_date ? this.first_air_date.substring(0, 4) : null;
+// Virtual for genre objects
+tvShowSchema.virtual('genreObjects', {
+  ref: 'Genre',
+  localField: 'genres',
+  foreignField: 'tmdbId'
 });
 
-// Index for faster searches
-tvShowSchema.index({ name: "text", overview: "text" });
-tvShowSchema.index({ genre_ids: 1 });
-tvShowSchema.index({ vote_average: -1 });
-tvShowSchema.index({ first_air_date: -1 });
+// Instead of permanently deleting, mark as deleted
+tvShowSchema.methods.softDelete = async function() {
+  this.status = 'deleted';
+  return this.save();
+};
 
-const TVShow = mongoose.model("TVShow", tvShowSchema);
+// Hide from regular queries but keep in database
+tvShowSchema.methods.hide = async function() {
+  this.status = 'hidden';
+  return this.save();
+};
 
-module.exports = TVShow;
+// Only return active TV shows by default
+tvShowSchema.pre('find', function() {
+  if (!this._conditions.status) {
+    this._conditions.status = { $ne: 'deleted' };
+  }
+});
+
+tvShowSchema.pre('findOne', function() {
+  if (!this._conditions.status) {
+    this._conditions.status = { $ne: 'deleted' };
+  }
+});
+
+module.exports = mongoose.model('TvShow', tvShowSchema);

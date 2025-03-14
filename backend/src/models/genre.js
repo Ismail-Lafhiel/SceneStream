@@ -1,24 +1,28 @@
+// src/models/genre.js
 const mongoose = require('mongoose');
 
 const genreSchema = new mongoose.Schema({
-  id: {
+  tmdbId: {
     type: Number,
-    required: true
+    required: true,
+    unique: true
   },
   name: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
   type: {
     type: String,
-    enum: ['movie', 'tv'],
-    required: true
+    enum: ['movie', 'tv', 'both'],
+    default: 'both'
+  },
+  isCustom: {
+    type: Boolean,
+    default: false
   }
-}, { timestamps: true });
+}, { 
+  timestamps: true 
+});
 
-// Create a compound index on id and type to allow same id for different types
-genreSchema.index({ id: 1, type: 1 }, { unique: true });
-
-const Genre = mongoose.model('Genre', genreSchema);
-
-module.exports = Genre;
+module.exports = mongoose.model('Genre', genreSchema);
