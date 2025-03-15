@@ -9,11 +9,6 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
 
-// Local storage key for bookmarks
-const BOOKMARKS_STORAGE_KEY =
-  import.meta.env.VITE_BOOKMARKS_STORAGE_KEY || "bookmarks";
-
-// Hook for managing bookmarks
 export const useBookmarks = () => {
   const [bookmarks, setBookmarks] = useState<
     (MovieDetailsInterface | TvShowDetailsInterface)[]
@@ -61,20 +56,10 @@ export const useBookmarks = () => {
         // If no bookmarks found, initialize empty bookmarks
         if (backendBookmarks.length === 0) {
           console.log("No bookmarks found or error occurred");
-          localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify([]));
           setBookmarks([]);
           setIsLoading(false);
           return;
         }
-
-        // Update local storage with backend bookmark IDs
-        const bookmarkIds = backendBookmarks.map(
-          (bookmark: any) => bookmark.id
-        );
-        localStorage.setItem(
-          BOOKMARKS_STORAGE_KEY,
-          JSON.stringify(bookmarkIds)
-        );
 
         // Fetch details for each bookmarked item
         const bookmarkDetails = await Promise.all(
@@ -131,21 +116,8 @@ export const useBookmarks = () => {
         return;
       }
 
-      // Check if already bookmarked
-      const storedIds = JSON.parse(
-        localStorage.getItem(BOOKMARKS_STORAGE_KEY) || "[]"
-      );
-      if (storedIds.includes(data.id)) {
-        toast.error("This item is already in your bookmarks");
-        return;
-      }
-
       // Add bookmark to backend
       await createBookmark(type, data, token);
-
-      // Update local storage
-      const updatedIds = [...storedIds, data.id];
-      localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify(updatedIds));
 
       // Update state
       setBookmarks((prev) => [...prev, data]);
@@ -174,15 +146,6 @@ export const useBookmarks = () => {
       // Remove bookmark from backend
       await deleteBookmark(type, id, token);
 
-      // Update local storage
-      const storedIds = JSON.parse(
-        localStorage.getItem(BOOKMARKS_STORAGE_KEY) || "[]"
-      );
-      const updatedIds = storedIds.filter(
-        (storedId: number) => storedId !== id
-      );
-      localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify(updatedIds));
-
       // Update state
       setBookmarks((prev) => prev.filter((bookmark) => bookmark.id !== id));
       toast.success("Removed from bookmarks!");
@@ -194,10 +157,7 @@ export const useBookmarks = () => {
 
   // Check if an item is bookmarked
   const isBookmarked = (id: number) => {
-    const storedIds = JSON.parse(
-      localStorage.getItem(BOOKMARKS_STORAGE_KEY) || "[]"
-    );
-    return storedIds.includes(id);
+    return bookmarks.some((bookmark) => bookmark.id === id);
   };
 
   return {

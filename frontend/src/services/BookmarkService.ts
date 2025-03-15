@@ -2,7 +2,7 @@ import axios from "axios";
 import { MovieDetailsInterface, TvShowDetailsInterface } from "@/interfaces";
 import { getUserIdFromToken } from "@/utils/authUtils";
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+const BASE_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
 /**
  * Create a new bookmark (movie or TV show)
@@ -16,29 +16,38 @@ export const createBookmark = async (
     const userId = getUserIdFromToken(token);
     if (!userId) throw new Error("User ID not found in token");
 
-    // Ensure type is a valid value - this is what's causing your error
-    if (type !== "movie" && type !== "tv") {
-      throw new Error(
-        `Invalid bookmark type: ${type}. Must be 'movie' or 'tv'.`
-      );
-    }
-
-    // Create a clean bookmark object with required fields only
-    const bookmarkData = {
-      userId,
+    // Prepare the payload according to the backend expectations
+    let payload = {
       type,
+      // Common fields
       id: data.id,
-      // Add only necessary fields based on your backend requirements
-      // For movies
-      title: "title" in data ? data.title : undefined,
       poster_path: data.poster_path,
-      // For TV shows
-      name: "name" in data ? data.name : undefined,
+      backdrop_path: data.backdrop_path,
+      vote_average: data.vote_average,
+      overview: data.overview,
     };
 
-    console.log("Creating bookmark payload:", bookmarkData); // Log the payload
+    // Add type-specific fields
+    if (type === "movie") {
+      payload = {
+        ...payload,
+        //@ts-ignore
+        title: (data as MovieDetailsInterface).title,
+        release_date: (data as MovieDetailsInterface).release_date,
+        runtime: (data as MovieDetailsInterface).runtime,
+      };
+    } else if (type === "tv") {
+      payload = {
+        ...payload,
+        //@ts-ignore
+        name: (data as TvShowDetailsInterface).name,
+        first_air_date: (data as TvShowDetailsInterface).first_air_date,
+        number_of_seasons: (data as TvShowDetailsInterface).number_of_seasons,
+        number_of_episodes: (data as TvShowDetailsInterface).number_of_episodes,
+      };
+    }
 
-    const response = await axios.post(`${BASE_URL}/bookmarks`, bookmarkData, {
+    const response = await axios.post(`${BASE_URL}/bookmarks`, payload, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -64,13 +73,6 @@ export const deleteBookmark = async (
   token: string
 ) => {
   try {
-    // Ensure type is valid
-    if (type !== "movie" && type !== "tv") {
-      throw new Error(
-        `Invalid bookmark type: ${type}. Must be 'movie' or 'tv'.`
-      );
-    }
-
     const response = await axios.delete(`${BASE_URL}/bookmarks/${type}/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
