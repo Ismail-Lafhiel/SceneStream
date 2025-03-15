@@ -1,16 +1,18 @@
-import express from "express";
-import tvShowController from "../controllers/tvShowController";
+import express from 'express';
+import {
+  getTVShows,
+  getTVShowById,
+  updateTVShow,
+  deleteTVShow,
+  addTVShow,
+} from '../controllers/tvShowController';
 
 const router = express.Router();
 
-// TMDB API routes
-router.get("/popular", tvShowController.getPopularTvShows);
-
-// Database routes
-router.post("/", tvShowController.addTVShow);
-router.put("/:id", tvShowController.updateTVShow);
-router.delete("/:id", tvShowController.deleteTVShow);
-router.get("/", tvShowController.getAllTVShows);
-router.get("/:id", tvShowController.getTVShowById);
+router.get('/', getTVShows);
+router.post('/', addTVShow);
+router.get('/:id', getTVShowById);
+router.put('/:id', updateTVShow);
+router.delete('/:id', deleteTVShow);
 
 export default router;

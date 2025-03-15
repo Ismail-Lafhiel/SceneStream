@@ -10,7 +10,7 @@ const MovieSchema: Schema = new Schema({
   release_date: { type: String },
   vote_average: { type: Number },
   vote_count: { type: Number },
-  genre_ids: { type: [Number] },
+  genre_ids: [{ type: Schema.Types.ObjectId, ref: "Genre" }],
   runtime: { type: Number },
   status: { type: String },
   tagline: { type: String },
@@ -45,5 +45,7 @@ const MovieSchema: Schema = new Schema({
     ],
   },
 });
+
+MovieSchema.index({ id: 1 }, { unique: true });
 
 export default mongoose.model<IMovie & Document>("Movie", MovieSchema);

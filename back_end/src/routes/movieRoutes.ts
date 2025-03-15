@@ -1,16 +1,19 @@
-import express from "express";
-import movieController from "../controllers/movieController";
+import express from 'express';
+import {
+  getMovies,
+  getMovieById,
+  updateMovie,
+  deleteMovie,
+  addMovie,
+} from '../controllers/movieController';
 
 const router = express.Router();
 
-// TMDB API routes
-router.get("/popular", movieController.getPopularMovies);
-
-// Database routes
-router.post("/", movieController.addMovie);
-router.put("/:id", movieController.updateMovie);
-router.delete("/:id", movieController.deleteMovie);
-router.get("/", movieController.getAllMovies);
-router.get("/:id", movieController.getMovieById);
+// Apply routes
+router.get('/', getMovies);
+router.post('/', addMovie);
+router.get('/:id', getMovieById);
+router.put('/:id', updateMovie);
+router.delete('/:id', deleteMovie);
 
 export default router;

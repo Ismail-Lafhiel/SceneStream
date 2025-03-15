@@ -1,14 +1,11 @@
-import express from "express";
-import genreController from "../controllers/genreController";
+import express from 'express';
+import { getGenres, updateGenre, deleteGenre, addGenre } from '../controllers/genreController';
 
 const router = express.Router();
 
-// TMDB API routes
-router.get("/movie", genreController.getMovieGenres);
-router.get("/tv", genreController.getTvGenres);
-
-// Database routes
-router.post("/", genreController.addGenre);
-router.get("/", genreController.getAllGenres);
+router.get('/', getGenres);
+router.post('/', addGenre);
+router.put('/:id', updateGenre);
+router.delete('/:id', deleteGenre);
 
 export default router;

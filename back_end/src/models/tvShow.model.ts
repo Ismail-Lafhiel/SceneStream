@@ -10,7 +10,7 @@ const TVShowSchema: Schema = new Schema({
   first_air_date: { type: String },
   vote_average: { type: Number },
   vote_count: { type: Number },
-  genre_ids: { type: [Number] },
+  genre_ids: [{ type: Schema.Types.ObjectId, ref: "Genre" }],
   number_of_seasons: { type: Number },
   number_of_episodes: { type: Number },
   status: { type: String },
@@ -46,5 +46,7 @@ const TVShowSchema: Schema = new Schema({
     ],
   },
 });
+
+TVShowSchema.index({ id: 1 }, { unique: true });
 
 export default mongoose.model<ITVShow & Document>("TVShow", TVShowSchema);

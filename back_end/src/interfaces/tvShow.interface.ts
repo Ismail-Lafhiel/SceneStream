@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { IVideo } from "./video.interface";
 
 export interface ITVShow {
@@ -9,7 +10,7 @@ export interface ITVShow {
   first_air_date: string;
   vote_average: number;
   vote_count: number;
-  genre_ids: number[];
+  genre_ids?: Types.ObjectId[];
   number_of_seasons?: number;
   number_of_episodes?: number;
   status?: string;
