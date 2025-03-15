@@ -14,6 +14,7 @@ app.use(express.json()); // Parse JSON bodies
 app.use(logger); // Log requests
 app.use(morgan('dev')); // HTTP request logger
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // Sync users from Cognito to MongoDB when the app starts
 userService

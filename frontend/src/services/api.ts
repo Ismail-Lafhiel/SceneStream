@@ -9,24 +9,9 @@ import {
 import { TVShowDetails } from "@/interfaces/utility.interface";
 import { fetchAuthSession } from "aws-amplify/auth";
 
-interface DiscoverParams {
-  page?: number;
-  with_genres?: number | null;
-  sort_by?: string;
-  search?: string;
-}
-
-const tmdbApi = axios.create({
-  baseURL: "https://api.themoviedb.org/3",
-  params: {
-    api_key: import.meta.env.VITE_APP_TMDB_API_KEY,
-    language: "en-US",
-  },
-});
-
 // Create base axios instance
 const backendApi = axios.create({
-  baseURL: import.meta.env.VITE_APP_BACKEND_URL || "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_APP_BACKEND_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -43,41 +28,20 @@ const getAuthToken = async () => {
   }
 };
 
-export const createMovie = async (movieData) => {
-  try {
-    const token = await getAuthToken();
+interface DiscoverParams {
+  page?: number;
+  with_genres?: number | null;
+  sort_by?: string;
+  search?: string;
+}
 
-    if (!token) {
-      throw new Error("Authentication required");
-    }
-
-    const response = await backendApi.post("/movies", movieData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Create movie error:", error);
-    throw new Error(error.response?.data?.message || "Failed to create movie");
-  }
-};
-
-export const getMovies = async () => {
-  try {
-    // Get the current auth token
-    const token = await getAuthToken();
-
-    const response = await backendApi.get("/movies", {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Failed to fetch movies");
-  }
-};
-
+const tmdbApi = axios.create({
+  baseURL: "https://api.themoviedb.org/3",
+  params: {
+    api_key: import.meta.env.VITE_APP_TMDB_API_KEY,
+    language: "en-US",
+  },
+});
 
 export const createTvShow = async (tvShowData) => {
   try {
