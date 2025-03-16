@@ -23,10 +23,14 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
+  Trash,
+  Edit,
 } from "lucide-react";
 import { useDarkMode } from "@/contexts/DarkModeContext";
-import { getGenres } from "@/services/GenreService";
+import { getGenres, deleteGenre } from "@/services/GenreService";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import ConfirmationDialog from "@/components/confirmationDialog/ConfirmationDialog";
 
 const Genres = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,6 +44,10 @@ const Genres = () => {
   const [genresPerPage, setGenresPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
+
+  // Delete confirmation dialog
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [genreToDelete, setGenreToDelete] = useState(null);
 
   // Fetch genres from API with pagination
   useEffect(() => {
@@ -96,7 +104,36 @@ const Genres = () => {
     }
   };
 
-  // Generate pagination items
+  // Handle delete genre
+  const handleDeleteGenre = async () => {
+    if (!genreToDelete) return;
+
+    try {
+      await deleteGenre(genreToDelete.id);
+      toast.success("Genre deleted successfully!");
+      // Refresh the genres list
+      const response = await getGenres({
+        page: currentPage,
+        limit: genresPerPage,
+      });
+      setGenres(response.results || []);
+      setTotalPages(response.total_pages || 1);
+      setTotalResults(response.total_results || 0);
+    } catch (err) {
+      toast.error(err.message || "Failed to delete genre");
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setGenreToDelete(null);
+    }
+  };
+
+  // Open delete confirmation dialog
+  const openDeleteDialog = (genre) => {
+    setGenreToDelete(genre);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Render pagination items (e.g., 1, 2, 3, ...)
   const renderPaginationItems = () => {
     const pageNumbers = [];
 
@@ -225,9 +262,21 @@ const Genres = () => {
         isDarkMode ? "bg-gray-900 text-white" : "bg-white text-slate-900"
       }`}
     >
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDeleteGenre}
+        title="Delete Genre"
+        message={`Are you sure you want to delete the genre "${genreToDelete?.name}"?`}
+      />
+
+      {/* Rest of the component */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Genre Management</h2>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Genre Management
+          </h2>
           <p
             className={`mt-1 ${
               isDarkMode ? "text-slate-400" : "text-slate-500"
@@ -250,6 +299,7 @@ const Genres = () => {
         </Link>
       </div>
 
+      {/* Search and Pagination Controls */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="relative w-full sm:w-80">
           <Search
@@ -296,6 +346,7 @@ const Genres = () => {
         </div>
       </div>
 
+      {/* Genres Table */}
       <div
         className={`rounded-lg border overflow-hidden shadow-sm ${
           isDarkMode
@@ -382,7 +433,9 @@ const Genres = () => {
               filteredGenres.map((genre) => (
                 <TableRow
                   key={genre.id}
-                  className={isDarkMode ? "border-slate-800" : "border-slate-200"}
+                  className={
+                    isDarkMode ? "border-slate-800" : "border-slate-200"
+                  }
                 >
                   <TableCell className="font-medium">{genre.name}</TableCell>
                   <TableCell>
@@ -401,23 +454,32 @@ const Genres = () => {
                         className={isDarkMode ? "bg-slate-800" : "bg-white"}
                       >
                         <DropdownMenuLabel
-                          className={isDarkMode ? "text-slate-200" : "text-slate-800"}
+                          className={
+                            isDarkMode ? "text-slate-200" : "text-slate-800"
+                          }
                         >
                           Actions
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          className={isDarkMode 
-                            ? "text-slate-300 hover:bg-slate-700"
-                            : "text-slate-700 hover:bg-slate-100"}
+                          className={
+                            isDarkMode
+                              ? "text-slate-300 hover:bg-slate-700"
+                              : "text-slate-700 hover:bg-slate-100"
+                          }
                         >
+                          <Edit className="mr-2 h-4 w-4" />
                           Edit Genre
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          className={isDarkMode 
-                            ? "text-slate-300 hover:bg-slate-700"
-                            : "text-slate-700 hover:bg-slate-100"}
+                          className={
+                            isDarkMode
+                              ? "text-slate-300 hover:bg-slate-700"
+                              : "text-slate-700 hover:bg-slate-100"
+                          }
+                          onClick={() => openDeleteDialog(genre)}
                         >
+                          <Trash className="mr-2 h-4 w-4" />
                           Delete Genre
                         </DropdownMenuItem>
                       </DropdownMenuContent>

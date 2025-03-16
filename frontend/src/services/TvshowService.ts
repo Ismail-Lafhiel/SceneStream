@@ -68,3 +68,23 @@ export const getTvShows = async (params = {}) => {
     );
   }
 };
+
+export const deleteTvShow = async (id) => {
+  try {
+    const token = await getAuthToken();
+
+    if (!token) {
+      throw new Error("Authentication required");
+    }
+
+    const response = await backendApi.delete(`/tvshows/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Delete genre error:", error);
+    throw new Error(error.response?.data?.message || "Failed to delete tvshow");
+  }
+};

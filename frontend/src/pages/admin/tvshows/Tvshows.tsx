@@ -23,11 +23,14 @@ import {
   Star,
   ChevronLeft,
   ChevronRight,
+  Trash,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useDarkMode } from "@/contexts/DarkModeContext";
-import { getTvShows } from "@/services/TvshowService";
+import { getTvShows, deleteTvShow } from "@/services/TvshowService";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import ConfirmationDialog from "@/components/confirmationDialog/ConfirmationDialog";
 import { FaTv } from "react-icons/fa";
 
 const TVShows = () => {
@@ -42,6 +45,10 @@ const TVShows = () => {
   const [tvShowsPerPage, setTvShowsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
+
+  // Delete confirmation dialog
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [tvShowToDelete, setTvShowToDelete] = useState(null);
 
   // Fetch TV shows from API with pagination
   useEffect(() => {
@@ -98,6 +105,35 @@ const TVShows = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
+  };
+
+  // Handle delete TV show
+  const handleDeleteTvShow = async () => {
+    if (!tvShowToDelete) return;
+
+    try {
+      await deleteTvShow(tvShowToDelete.id);
+      toast.success("TV show deleted successfully!");
+      // Refresh the TV shows list
+      const response = await getTvShows({
+        page: currentPage,
+        limit: tvShowsPerPage,
+      });
+      setTvShows(response.results || []);
+      setTotalPages(response.total_pages || 1);
+      setTotalResults(response.total_results || 0);
+    } catch (err) {
+      toast.error(err.message || "Failed to delete TV show");
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setTvShowToDelete(null);
+    }
+  };
+
+  // Open delete confirmation dialog
+  const openDeleteDialog = (tvShow) => {
+    setTvShowToDelete(tvShow);
+    setIsDeleteDialogOpen(true);
   };
 
   // Format date for display
@@ -270,6 +306,16 @@ const TVShows = () => {
         isDarkMode ? "bg-gray-900 text-white" : "bg-white text-slate-900"
       }`}
     >
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDeleteTvShow}
+        title="Delete TV Show"
+        message={`Are you sure you want to delete the TV show "${tvShowToDelete?.name}"?`}
+      />
+
+      {/* Rest of the component */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
@@ -284,19 +330,20 @@ const TVShows = () => {
           </p>
         </div>
         <Link to="/admin/tvshows/create">
-          <button
-            className={`p-3 cursor-pointer rounded-full hidden md:flex items-center space-x-2 ${
+          <Button
+            className={`${
               isDarkMode
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-            } transition-colors`}
+                ? "bg-blue-600 hover:bg-blue-700"
+                : "bg-blue-500 hover:bg-blue-600"
+            } text-white cursor-pointer rounded-full`}
           >
-            <FaTv className="w-4 h-4" />
-            <span className="text-sm font-medium">Add Tvshow</span>
-          </button>
+            <FaTv className="h-4 w-4 mr-2" />
+            Add TV Show
+          </Button>
         </Link>
       </div>
 
+      {/* Search and Pagination Controls */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="relative w-full sm:w-80">
           <Search
@@ -343,6 +390,7 @@ const TVShows = () => {
         </div>
       </div>
 
+      {/* TV Shows Table */}
       <div
         className={`rounded-lg border overflow-hidden shadow-sm ${
           isDarkMode
@@ -511,7 +559,9 @@ const TVShows = () => {
                               ? "text-slate-300 focus:bg-slate-800"
                               : "text-slate-700 focus:bg-slate-50"
                           }
+                          onClick={() => openDeleteDialog(tvShow)}
                         >
+                          <Trash className="mr-2 h-4 w-4" />
                           Delete TV show
                         </DropdownMenuItem>
                       </DropdownMenuContent>

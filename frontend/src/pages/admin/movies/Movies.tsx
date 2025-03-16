@@ -23,12 +23,15 @@ import {
   Star,
   ChevronLeft,
   ChevronRight,
+  Trash,
+  Plus,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useDarkMode } from "@/contexts/DarkModeContext";
-import { getMovies } from "@/services/MovieService";
+import { getMovies, deleteMovie } from "@/services/MovieService";
 import { Link } from "react-router-dom";
-import { FaFilm } from "react-icons/fa";
+import { toast } from "react-toastify";
+import ConfirmationDialog from "@/components/confirmationDialog/ConfirmationDialog";
 
 const Movies = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,6 +45,10 @@ const Movies = () => {
   const [moviesPerPage, setMoviesPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
+
+  // Delete confirmation dialog
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [movieToDelete, setMovieToDelete] = useState(null);
 
   // Fetch movies from API with pagination
   useEffect(() => {
@@ -98,6 +105,35 @@ const Movies = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
+  };
+
+  // Handle delete movie
+  const handleDeleteMovie = async () => {
+    if (!movieToDelete) return;
+
+    try {
+      await deleteMovie(movieToDelete.id);
+      toast.success("Movie deleted successfully!");
+      // Refresh the movies list
+      const response = await getMovies({
+        page: currentPage,
+        limit: moviesPerPage,
+      });
+      setMovies(response.results || []);
+      setTotalPages(response.total_pages || 1);
+      setTotalResults(response.total_results || 0);
+    } catch (err) {
+      toast.error(err.message || "Failed to delete movie");
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setMovieToDelete(null);
+    }
+  };
+
+  // Open delete confirmation dialog
+  const openDeleteDialog = (movie) => {
+    setMovieToDelete(movie);
+    setIsDeleteDialogOpen(true);
   };
 
   // Format date for display
@@ -270,6 +306,16 @@ const Movies = () => {
         isDarkMode ? "bg-gray-900 text-white" : "bg-white text-slate-900"
       }`}
     >
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDeleteMovie}
+        title="Delete Movie"
+        message={`Are you sure you want to delete the movie "${movieToDelete?.title}"?`}
+      />
+
+      {/* Rest of the component */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
@@ -284,19 +330,20 @@ const Movies = () => {
           </p>
         </div>
         <Link to="/admin/movies/create">
-          <button
-            className={`p-3 cursor-pointer rounded-full hidden md:flex items-center space-x-2 ${
+          <Button
+            className={`${
               isDarkMode
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-            } transition-colors`}
+                ? "bg-blue-600 hover:bg-blue-700"
+                : "bg-blue-500 hover:bg-blue-600"
+            } text-white cursor-pointer rounded-full`}
           >
-            <FaFilm className="w-4 h-4" />
-            <span className="text-sm font-medium">Add Movie</span>
-          </button>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Movie
+          </Button>
         </Link>
       </div>
 
+      {/* Search and Pagination Controls */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="relative w-full sm:w-80">
           <Search
@@ -343,6 +390,7 @@ const Movies = () => {
         </div>
       </div>
 
+      {/* Movies Table */}
       <div
         className={`rounded-lg border overflow-hidden shadow-sm ${
           isDarkMode
@@ -511,7 +559,9 @@ const Movies = () => {
                               ? "text-slate-300 focus:bg-slate-800"
                               : "text-slate-700 focus:bg-slate-50"
                           }
+                          onClick={() => openDeleteDialog(movie)}
                         >
+                          <Trash className="mr-2 h-4 w-4" />
                           Delete movie
                         </DropdownMenuItem>
                       </DropdownMenuContent>
