@@ -123,29 +123,33 @@ const CreateMovie = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
     try {
-      // Prepare the movie data as a JSON object
-      const movieData = {
-        title: formData.title,
-        overview: formData.overview,
-        release_date: formData.release_date,
-        tagline: formData.tagline,
-        status: formData.status,
-        runtime: formData.runtime,
-        genre_ids: selectedGenres, // Send genre IDs as an array
-        vote_average: formData.vote_average || 0,
-        vote_count: formData.vote_count || 0,
-        id: Math.floor(Math.random() * 1000000), // Generate a random ID
-        credits: { cast: [], crew: [] }, // Empty credits
-        videos: { results: [] }, // Empty videos
-      };
+      const formDataToSend = new FormData();
+      formDataToSend.append("title", formData.title);
+      formDataToSend.append("overview", formData.overview);
+      formDataToSend.append("release_date", formData.release_date);
+      formDataToSend.append("tagline", formData.tagline);
+      formDataToSend.append("status", formData.status);
+      formDataToSend.append("runtime", formData.runtime);
+      formDataToSend.append("vote_average", formData.vote_average);
+      formDataToSend.append("vote_count", formData.vote_count);
 
-      // Log the payload for debugging
-      console.log("Movie data payload:", movieData);
+      // Append each genre ID individually
+      selectedGenres.forEach((genreId) => {
+        formDataToSend.append("genre_ids[]", genreId);
+      });
 
-      // Send the JSON payload to the backend
-      const response = await createMovie(movieData);
+      if (formData.poster_path) {
+        formDataToSend.append("poster_path", formData.poster_path);
+      }
+
+      if (formData.backdrop_path) {
+        formDataToSend.append("backdrop_path", formData.backdrop_path);
+      }
+
+      const response = await createMovie(formDataToSend);
       navigate(`/movies/${response.id}`);
     } catch (err) {
       setError(err.message || "Failed to create movie");

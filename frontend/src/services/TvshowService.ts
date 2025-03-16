@@ -20,7 +20,7 @@ const getAuthToken = async () => {
   }
 };
 
-export const createMovie = async (movieData) => {
+export const createTvShow = async (tvShowData) => {
   try {
     const token = await getAuthToken();
 
@@ -28,7 +28,7 @@ export const createMovie = async (movieData) => {
       throw new Error("Authentication required");
     }
 
-    const response = await backendApi.post("/movies", movieData, {
+    const response = await backendApi.post("/tvshows", tvShowData, {
       headers: {
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token}`,
@@ -36,21 +36,24 @@ export const createMovie = async (movieData) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Create movie error:", error);
-    throw new Error(error.response?.data?.message || "Failed to create movie");
+    console.error("Create TV show error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to create TV show"
+    );
   }
 };
 
-export const getMovies = async () => {
+export const getTvShows = async () => {
   try {
-    // Get the current auth token
     const token = await getAuthToken();
 
-    const response = await backendApi.get("/movies", {
+    const response = await backendApi.get("/tvshows", {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Failed to fetch movies");
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch TV shows"
+    );
   }
 };

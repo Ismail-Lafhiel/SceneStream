@@ -13,21 +13,26 @@
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.760.0",
     "aws-jwt-verify": "^5.0.0",
+    "aws-sdk": "^2.1692.0",
     "axios": "^1.8.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.0.0",
     "mongoose": "^8.12.1",
     "morgan": "^1.10.0",
-    "node-cron": "^3.0.3"
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/morgan": "^1.9.9",
+    "@types/multer": "^1.4.12",
     "@types/node": "^22.13.10",
     "@types/node-cron": "^3.0.11",
+    "@types/uuid": "^10.0.0",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"

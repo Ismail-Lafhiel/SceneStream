@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { AppError } from "../utils/errors";
 import { tvService } from "../services/tvShowService";
+import {
+  processImageUploads,
+  uploadMovieImages,
+} from "../middlewares/fileUpload";
 
 export const getTVShows = async (req: Request, res: Response) => {
   const { page = 1, limit = 10 } = req.query;
@@ -17,24 +21,59 @@ export const getTVShowById = async (req: Request, res: Response) => {
   res.json(tvShow);
 };
 
-export const addTVShow = async (req: Request, res: Response) => {
-  const tvShowData = req.body;
-  const tvShow = await tvService.addTVShow(tvShowData);
-  res.status(201).json(tvShow);
-};
+export const addTVShow = [
+  uploadMovieImages,
+  processImageUploads,
+  async (req: Request, res: Response) => {
+    try {
+      const tvShowData = req.body;
 
-export const updateTVShow = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const tvShowData = req.body;
-  const updatedTVShow = await tvService.updateTVShow(Number(id), tvShowData);
-  if (!updatedTVShow) {
-    throw new AppError(404, "TV show not found");
-  }
-  res.json(updatedTVShow);
-};
+      // Convert genre_ids to an array of numbers
+      if (Array.isArray(tvShowData.genre_ids)) {
+        tvShowData.genre_ids = tvShowData.genre_ids.map(Number);
+      } else {
+        tvShowData.genre_ids = [];
+      }
+
+      console.log("Received TV show data:", tvShowData); // Log the received data
+      const tvShow = await tvService.addTVShow(tvShowData);
+      res.status(201).json(tvShow);
+    } catch (error) {
+      console.error("Error adding TV show:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+];
+
+export const updateTVShow = [
+  uploadMovieImages,
+  processImageUploads,
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const tvShowData = req.body;
+      const updatedTVShow = await tvService.updateTVShow(
+        Number(id),
+        tvShowData
+      );
+      if (!updatedTVShow) {
+        throw new AppError(404, "TV show not found");
+      }
+      res.json(updatedTVShow);
+    } catch (error) {
+      console.error("Error updating TV show:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+];
 
 export const deleteTVShow = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  await tvService.deleteTVShow(Number(id));
-  res.status(204).send();
+  try {
+    const { id } = req.params;
+    await tvService.deleteTVShow(Number(id));
+    res.status(204).send();
+  } catch (error) {
+    console.error("Error deleting TV show:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
