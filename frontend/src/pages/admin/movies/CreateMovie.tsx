@@ -150,7 +150,7 @@ const CreateMovie = () => {
       }
 
       const response = await createMovie(formDataToSend);
-      navigate(`/movies/${response.id}`);
+      navigate('/admin/movies');
     } catch (err) {
       setError(err.message || "Failed to create movie");
     } finally {

@@ -28,29 +28,39 @@ export const createGenre = async (genreData) => {
       throw new Error("Authentication required");
     }
 
-    const response = await backendApi.post("/genre", genreData, {
+    const response = await backendApi.post("/genres", genreData, {
       headers: {
-        "Content-Type": "multipart/form-data",
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
   } catch (error) {
-    console.error("Create movie error:", error);
+    console.error("Create genre error:", error);
     throw new Error(error.response?.data?.message || "Failed to create genre");
   }
 };
 
-export const getGenres = async () => {
+export const getGenres = async (params = {}) => {
   try {
     // Get the current auth token
     const token = await getAuthToken();
 
-    const response = await backendApi.get("/genres", {
+    // Construct query parameters
+    const queryParams = new URLSearchParams();
+    if (params.page) queryParams.append("page", params.page);
+    if (params.limit) queryParams.append("limit", params.limit);
+
+    // Add query string to URL if we have parameters
+    const queryString = queryParams.toString()
+      ? `?${queryParams.toString()}`
+      : "";
+
+    const response = await backendApi.get(`/genres${queryString}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Failed to fetch genre");
+    throw new Error(error.response?.data?.message || "Failed to fetch genres");
   }
 };

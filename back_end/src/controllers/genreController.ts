@@ -3,16 +3,25 @@ import { genreService } from "../services/genreService";
 import { AppError } from "../utils/errors";
 
 export const getGenres = async (req: Request, res: Response) => {
-  const genres = await genreService.getAllGenres();
-  res.json(genres);
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const genres = await genreService.getAllGenres(Number(page), Number(limit));
+    res.json(genres);
+  } catch (error) {
+    console.error("Error fetching genres:", error);
+    res.status(500).json({ error: "Failed to fetch genres" });
+  }
 };
 
 export const addGenre = async (req: Request, res: Response) => {
   const genreData = req.body;
-  const genre = await genreService.addGenre(genreData);
-  res.status(201).json(genre);
+  try {
+    const genre = await genreService.addGenre(genreData);
+    res.status(201).json(genre);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to create genre", error });
+  }
 };
-
 export const updateGenre = async (req: Request, res: Response) => {
   const { id } = req.params;
   const genreData = req.body;

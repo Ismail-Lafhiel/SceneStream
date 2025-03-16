@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -17,84 +17,43 @@ import {
 } from "@/components/ui/Dropdown-menu";
 import { Button } from "@/components/ui/TableButton";
 import { Input } from "@/components/ui/Input";
-import { MoreHorizontal, Search, UserPlus, ChevronDown } from "lucide-react";
+import { MoreHorizontal, Search } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useDarkMode } from "@/contexts/DarkModeContext";
+import { getUsers } from "@/services/UserService";
 
 const Users = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { isDarkMode } = useDarkMode();
 
-  // Static user data - this will be replaced with API calls later
-  const users = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john.doe@example.com",
-      role: "Admin",
-      status: "Active",
-      lastLogin: "2025-03-08T15:30:45",
-      subscriptionPlan: "Premium",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane.smith@example.com",
-      role: "Editor",
-      status: "Active",
-      lastLogin: "2025-03-07T10:15:22",
-      subscriptionPlan: "Basic",
-    },
-    {
-      id: 3,
-      name: "Robert Johnson",
-      email: "robert.johnson@example.com",
-      role: "Viewer",
-      status: "Inactive",
-      lastLogin: "2025-02-28T09:45:11",
-      subscriptionPlan: "Free",
-    },
-    {
-      id: 4,
-      name: "Emily Davis",
-      email: "emily.davis@example.com",
-      role: "Editor",
-      status: "Active",
-      lastLogin: "2025-03-09T08:20:33",
-      subscriptionPlan: "Premium",
-    },
-    {
-      id: 5,
-      name: "Michael Wilson",
-      email: "michael.wilson@example.com",
-      role: "Viewer",
-      status: "Pending",
-      lastLogin: null,
-      subscriptionPlan: "Basic",
-    },
-  ];
+  // Fetch users from API
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const userData = await getUsers();
+        setUsers(userData);
+        setError(null);
+      } catch (err) {
+        setError(err.message || "Failed to fetch users");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   // Filter users based on search query
   const filteredUsers = users.filter(
     (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchQuery.toLowerCase())
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.role?.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Format date for display
-  const formatDate = (dateString) => {
-    if (!dateString) return "Never";
-
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
-  };
 
   // Get styling for user roles
   const getRoleBadgeStyle = (role) => {
@@ -119,60 +78,6 @@ const Users = () => {
           return "bg-sky-100 text-sky-800 font-medium";
         default:
           return "bg-slate-100 text-slate-800 font-medium";
-      }
-    }
-  };
-
-  // Status badge color mapper
-  const getStatusColor = (status) => {
-    if (isDarkMode) {
-      switch (status) {
-        case "Active":
-          return "bg-green-900 text-green-300";
-        case "Inactive":
-          return "bg-red-900 text-red-300";
-        case "Pending":
-          return "bg-yellow-900 text-yellow-300";
-        default:
-          return "bg-gray-800 text-gray-300";
-      }
-    } else {
-      switch (status) {
-        case "Active":
-          return "bg-green-100 text-green-800";
-        case "Inactive":
-          return "bg-red-100 text-red-800";
-        case "Pending":
-          return "bg-yellow-100 text-yellow-800";
-        default:
-          return "bg-gray-100 text-gray-800";
-      }
-    }
-  };
-
-  // Get plan badge style
-  const getPlanBadgeStyle = (plan) => {
-    if (isDarkMode) {
-      switch (plan) {
-        case "Premium":
-          return "bg-blue-900/50 text-blue-200 font-medium border border-blue-700";
-        case "Basic":
-          return "bg-slate-800/40 text-slate-300 font-medium border border-slate-700";
-        case "Free":
-          return "bg-slate-800/30 text-slate-400 font-medium border border-slate-700";
-        default:
-          return "bg-slate-800 text-slate-300 font-medium border border-slate-700";
-      }
-    } else {
-      switch (plan) {
-        case "Premium":
-          return "bg-blue-50 text-blue-800 font-medium border border-blue-200";
-        case "Basic":
-          return "bg-slate-50 text-slate-700 font-medium border border-slate-200";
-        case "Free":
-          return "bg-slate-50 text-slate-600 font-medium border border-slate-200";
-        default:
-          return "bg-slate-50 text-slate-800 font-medium border border-slate-200";
       }
     }
   };
@@ -219,14 +124,47 @@ const Users = () => {
               <TableHead className="font-semibold">Name</TableHead>
               <TableHead className="font-semibold">Email</TableHead>
               <TableHead className="font-semibold">Role</TableHead>
-              <TableHead className="font-semibold">Status</TableHead>
-              <TableHead className="font-semibold">Last Login</TableHead>
-              <TableHead className="font-semibold">Plan</TableHead>
               <TableHead className="w-16"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredUsers.length > 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={4}
+                  className={`text-center py-12 ${
+                    isDarkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
+                >
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em]" role="status">
+                      <span className="sr-only">Loading...</span>
+                    </div>
+                    <p>Loading users...</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : error ? (
+              <TableRow>
+                <TableCell
+                  colSpan={4}
+                  className={`text-center py-12 ${
+                    isDarkMode ? "text-red-400" : "text-red-600"
+                  }`}
+                >
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <p>Error: {error}</p>
+                    <Button 
+                      variant="link" 
+                      className={isDarkMode ? "text-blue-400" : "text-blue-600"}
+                      onClick={() => window.location.reload()}
+                    >
+                      Try again
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : filteredUsers.length > 0 ? (
               filteredUsers.map((user) => (
                 <TableRow 
                   key={user.id} 
@@ -241,19 +179,6 @@ const Users = () => {
                   <TableCell>
                     <Badge className={`px-2 py-1 rounded-md text-xs ${getRoleBadgeStyle(user.role)}`}>
                       {user.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={`px-2 py-1 rounded-full text-xs ${getStatusColor(user.status)}`}>
-                      {user.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className={isDarkMode ? "text-slate-300" : "text-slate-600"}>
-                    {formatDate(user.lastLogin)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={`px-2 py-1 rounded-md text-xs ${getPlanBadgeStyle(user.subscriptionPlan)}`}>
-                      {user.subscriptionPlan}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -302,7 +227,7 @@ const Users = () => {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={4}
                   className={`text-center py-12 ${
                     isDarkMode ? "text-slate-400" : "text-slate-500"
                   }`}

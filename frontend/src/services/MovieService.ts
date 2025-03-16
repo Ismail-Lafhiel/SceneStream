@@ -41,12 +41,22 @@ export const createMovie = async (movieData) => {
   }
 };
 
-export const getMovies = async () => {
+export const getMovies = async (params = {}) => {
   try {
     // Get the current auth token
     const token = await getAuthToken();
 
-    const response = await backendApi.get("/movies", {
+    // Construct query parameters
+    const queryParams = new URLSearchParams();
+    if (params.page) queryParams.append("page", params.page);
+    if (params.limit) queryParams.append("limit", params.limit);
+
+    // Add query string to URL if we have parameters
+    const queryString = queryParams.toString()
+      ? `?${queryParams.toString()}`
+      : "";
+
+    const response = await backendApi.get(`/movies${queryString}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     return response.data;

@@ -155,7 +155,7 @@ const CreateTvShow = () => {
       }
 
       const response = await createTvShow(formDataToSend);
-      navigate(`/tvshows/${response.id}`);
+      navigate("/admin/tvshows");
     } catch (err) {
       setError(err.message || "Failed to create TV show");
     } finally {

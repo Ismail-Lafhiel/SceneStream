@@ -4,11 +4,10 @@ import {
   FaTachometerAlt,
   FaUsers,
   FaFilm,
-  FaStar,
   FaAngleRight,
   FaAngleDown,
-  FaCalendarAlt,
   FaFireAlt,
+  FaTv,
 } from "react-icons/fa";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 
@@ -38,7 +37,6 @@ const AdminSidebar = () => {
       icon: <FaUsers />,
       subItems: [
         { path: "/admin/users", label: "All Users" },
-        { path: "/admin/users/reviews", label: "User Reviews" },
       ],
     },
     {
@@ -47,28 +45,21 @@ const AdminSidebar = () => {
       icon: <FaFilm />,
       subItems: [
         { path: "/admin/movies", label: "All Movies" },
-        { path: "/admin/movies/popular", label: "Popular Movies" },
-        { path: "/admin/movies/top-rated", label: "Top Rated" },
-        { path: "/admin/movies/upcoming", label: "Upcoming Releases" },
       ],
     },
     {
-      id: "categories",
-      path: "/admin/categories",
-      label: "Categories",
+      id: "tvshows",
+      label: "TVshow Management",
+      icon: <FaTv />,
+      subItems: [
+        { path: "/admin/tvshows", label: "All TVshows" },
+      ],
+    },
+    {
+      id: "genres",
+      path: "/admin/genres",
+      label: "Genres",
       icon: <FaFireAlt />,
-    },
-    {
-      id: "reviews",
-      path: "/admin/reviews",
-      label: "Reviews",
-      icon: <FaStar />,
-    },
-    {
-      id: "release-dates",
-      path: "/admin/release-dates",
-      label: "Release Dates",
-      icon: <FaCalendarAlt />,
     },
   ];
 
