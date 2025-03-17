@@ -69,6 +69,43 @@ export const getTvShows = async (params = {}) => {
   }
 };
 
+export const updateTvShow = async (id, tvShowData) => {
+  try {
+    const token = await getAuthToken();
+
+    if (!token) {
+      throw new Error("Authentication required");
+    }
+
+    const response = await backendApi.put(`/tvshows/${id}`, tvShowData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Update TV show error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to update TV show"
+    );
+  }
+};
+
+export const getTvShowById = async (id) => {
+  try {
+    const token = await getAuthToken();
+
+    const response = await backendApi.get(`/tvshows/${id}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Get TV show by ID error:", error);
+    throw new Error(error.response?.data?.message || "Failed to fetch TV show");
+  }
+};
+
 export const deleteTvShow = async (id) => {
   try {
     const token = await getAuthToken();

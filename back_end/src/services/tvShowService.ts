@@ -28,10 +28,10 @@ export const tvService = {
   addTVShow: async (tvShowData: ITMDBTVShow) => {
     try {
       // Generate a unique ID
-      const lastTVShow = await TVShow.findOne().sort({ id: -1 }); // Find the TV show with the highest ID
-      const newId = lastTVShow ? lastTVShow.id + 1 : 1; // Increment the highest ID by 1 or start with 1
+      const lastTVShow = await TVShow.findOne().sort({ id: -1 });
+      const newId = lastTVShow ? lastTVShow.id + 1 : 1;
 
-      // Get genre IDs from either genres array or genre_ids
+      // Get genre ids from either genres array or genre_ids
       const genreIds = tvShowData.genres
         ? tvShowData.genres.map((g) => g.id)
         : tvShowData.genre_ids || [];
@@ -46,7 +46,7 @@ export const tvService = {
       // Create new TV show with properly typed genre_ids and generated ID
       const tvShow = new TVShow({
         ...tvShowDataClean,
-        id: newId, // Assign the generated ID
+        id: newId,
         genre_ids: genreObjectIds,
       });
 
@@ -72,24 +72,18 @@ export const tvService = {
     // Clone to avoid modifying the original
     const updateData: any = { ...tvShowData };
 
-    // Handle genre IDs
-    if ("genres" in updateData && updateData.genres) {
-      const genreIds = updateData.genres.map((g: any) => g.id);
+    // Handle genre ids
+    if ("genre_ids" in updateData && updateData.genre_ids) {
+      // Ensure genre_ids is an array of numbers
+      const genreIds = updateData.genre_ids
+        .map((genre: any) => (typeof genre === "object" ? genre.id : genre))
+        .filter((id: any) => !isNaN(id));
+
+      // Find corresponding ObjectIds in the database
       const genreDocuments = await Genre.find({ id: { $in: genreIds } });
       const genreObjectIds = genreDocuments.map((genre) => genre._id);
 
       updateData.genre_ids = genreObjectIds;
-      delete updateData.genres;
-    } else if ("genre_ids" in updateData && updateData.genre_ids) {
-      if (
-        updateData.genre_ids.length > 0 &&
-        typeof updateData.genre_ids[0] === "number"
-      ) {
-        const genreDocuments = await Genre.find({
-          id: { $in: updateData.genre_ids },
-        });
-        updateData.genre_ids = genreDocuments.map((genre) => genre._id);
-      }
     }
 
     // Find the existing TV show to delete old files from S3

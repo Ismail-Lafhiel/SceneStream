@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDarkMode } from "@/contexts/DarkModeContext";
-import { createMovie } from "@/services/MovieService";
+import { updateTvShow, getTvShowById } from "@/services/TvShowService";
+import { getGenres } from "@/services/GenreService";
 import {
   Camera,
-  Film,
+  Tv,
   Calendar,
   Upload,
   X,
@@ -14,22 +15,24 @@ import {
   Clock,
   Info,
 } from "lucide-react";
-import { getGenres } from "@/services/GenreService";
 
-const CreateMovie = () => {
+const UpdateTvShow = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { isDarkMode } = useDarkMode();
   const [formData, setFormData] = useState({
-    title: "",
+    name: "",
     overview: "",
-    release_date: "",
+    first_air_date: "",
     poster_path: null,
     backdrop_path: null,
     genre_ids: [],
     tagline: "",
-    status: "Unreleased",
-    runtime: "",
+    status: "Returning Series",
+    episode_run_time: "",
+    number_of_seasons: "",
+    number_of_episodes: "",
     vote_average: 0,
     vote_count: 0,
   });
@@ -40,22 +43,47 @@ const CreateMovie = () => {
   const [genres, setGenres] = useState([]);
   const [selectedGenres, setSelectedGenres] = useState([]);
 
-  // Fetch available genres on component mount
+  // Fetch available genres and existing TV show data on component mount
   useEffect(() => {
-    const fetchGenres = async () => {
+    const fetchData = async () => {
       try {
-        const response = await getGenres({ page: 1, limit: 100 });
-        // Extract the genres array from the response
-        const genresData = response.results || [];
+        const [genresResponse, tvShowResponse] = await Promise.all([
+          getGenres({ page: 1, limit: 100 }),
+          getTvShowById(id),
+        ]);
+
+        const genresData = genresResponse.results || [];
         setGenres(genresData);
+
+        if (tvShowResponse) {
+          setFormData({
+            name: tvShowResponse.name || "",
+            overview: tvShowResponse.overview || "",
+            first_air_date: tvShowResponse.first_air_date || "",
+            poster_path: tvShowResponse.poster_path || null,
+            backdrop_path: tvShowResponse.backdrop_path || null,
+            genre_ids: tvShowResponse.genre_ids || [],
+            tagline: tvShowResponse.tagline || "",
+            status: tvShowResponse.status || "Returning Series",
+            episode_run_time: tvShowResponse.episode_run_time || "",
+            number_of_seasons: tvShowResponse.number_of_seasons || "",
+            number_of_episodes: tvShowResponse.number_of_episodes || "",
+            vote_average: tvShowResponse.vote_average || 0,
+            vote_count: tvShowResponse.vote_count || 0,
+          });
+
+          setSelectedGenres(tvShowResponse.genre_ids || []);
+          setPosterPreview(tvShowResponse.poster_path);
+          setBackdropPreview(tvShowResponse.backdrop_path);
+        }
       } catch (err) {
-        console.error("Failed to fetch genres", err);
-        setError("Failed to load genres. Please try again later.");
+        console.error("Failed to fetch data", err);
+        setError("Failed to load data. Please try again later.");
       }
     };
 
-    fetchGenres();
-  }, []);
+    fetchData();
+  }, [id]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -68,7 +96,9 @@ const CreateMovie = () => {
 
     // Handle numeric fields
     if (
-      name === "runtime" ||
+      name === "episode_run_time" ||
+      name === "number_of_seasons" ||
+      name === "number_of_episodes" ||
       name === "vote_average" ||
       name === "vote_count"
     ) {
@@ -129,39 +159,44 @@ const CreateMovie = () => {
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("title", formData.title);
+
+      // Append basic fields
+      formDataToSend.append("name", formData.name);
       formDataToSend.append("overview", formData.overview);
-      formDataToSend.append("release_date", formData.release_date);
+      formDataToSend.append("first_air_date", formData.first_air_date);
       formDataToSend.append("tagline", formData.tagline);
       formDataToSend.append("status", formData.status);
-      formDataToSend.append("runtime", formData.runtime);
+      formDataToSend.append("episode_run_time", formData.episode_run_time);
+      formDataToSend.append("number_of_seasons", formData.number_of_seasons);
+      formDataToSend.append("number_of_episodes", formData.number_of_episodes);
       formDataToSend.append("vote_average", formData.vote_average);
       formDataToSend.append("vote_count", formData.vote_count);
 
-      // Append each genre ID individually
+      // Append genre_ids as an array of numbers
       selectedGenres.forEach((genreId) => {
         formDataToSend.append("genre_ids[]", genreId);
       });
 
-      if (formData.poster_path) {
+      // Append image files if they exist
+      if (formData.poster_path instanceof File) {
         formDataToSend.append("poster_path", formData.poster_path);
       }
-
-      if (formData.backdrop_path) {
+      if (formData.backdrop_path instanceof File) {
         formDataToSend.append("backdrop_path", formData.backdrop_path);
       }
 
-      const response = await createMovie(formDataToSend);
-      navigate('/admin/movies');
+      // Send the request
+      await updateTvShow(id, formDataToSend);
+      navigate("/admin/tvshows");
     } catch (err) {
-      setError(err.message || "Failed to create movie");
+      setError(err.message || "Failed to update TV show");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleLogin = () => {
-    navigate("/login", { state: { returnUrl: "/create-movie" } });
+    navigate("/login", { state: { returnUrl: `/update-tvshow/${id}` } });
   };
 
   // Dynamic classes based on dark mode
@@ -197,10 +232,8 @@ const CreateMovie = () => {
             } py-6 px-8`}
           >
             <div className="flex items-center">
-              <Film className="mr-3 h-8 w-8 text-white" />
-              <h1 className="text-3xl font-bold text-white">
-                Create New Movie
-              </h1>
+              <Tv className="mr-3 h-8 w-8 text-white" />
+              <h1 className="text-3xl font-bold text-white">Update TV Show</h1>
             </div>
           </div>
 
@@ -217,13 +250,13 @@ const CreateMovie = () => {
             {!isAuthenticated ? (
               <div className="py-8 text-center">
                 <div className="mb-6">
-                  <Film
+                  <Tv
                     className={`h-16 w-16 mx-auto ${
                       isDarkMode ? "text-indigo-400" : "text-blue-500"
                     }`}
                   />
                   <p className="mt-4 mb-6 text-lg">
-                    You need to be logged in to create a movie.
+                    You need to be logged in to update a TV show.
                   </p>
                   <button
                     onClick={handleLogin}
@@ -241,20 +274,20 @@ const CreateMovie = () => {
                     <label
                       className={`block ${labelClass} text-sm font-medium mb-2 flex items-center`}
                     >
-                      <Film className="mr-2 h-4 w-4" />
-                      Movie Title <span className="text-red-500 ml-1">*</span>
+                      <Tv className="mr-2 h-4 w-4" />
+                      TV Show Name <span className="text-red-500 ml-1">*</span>
                     </label>
                     <input
                       type="text"
-                      name="title"
-                      value={formData.title}
+                      name="name"
+                      value={formData.name}
                       onChange={handleChange}
                       className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
                         isDarkMode
                           ? "focus:ring-indigo-500"
                           : "focus:ring-blue-500"
                       } focus:border-transparent transition-all duration-200`}
-                      placeholder="Enter movie title"
+                      placeholder="Enter TV show name"
                       required
                     />
                   </div>
@@ -264,12 +297,12 @@ const CreateMovie = () => {
                       className={`block ${labelClass} text-sm font-medium mb-2 flex items-center`}
                     >
                       <Calendar className="mr-2 h-4 w-4" />
-                      Release Date
+                      First Air Date
                     </label>
                     <input
                       type="date"
-                      name="release_date"
-                      value={formData.release_date}
+                      name="first_air_date"
+                      value={formData.first_air_date}
                       onChange={handleChange}
                       className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
                         isDarkMode
@@ -321,10 +354,11 @@ const CreateMovie = () => {
                             : "focus:ring-blue-500"
                         } focus:border-transparent transition-all duration-200`}
                       >
-                        <option value="Unreleased">Unreleased</option>
-                        <option value="Released">Released</option>
+                        <option value="Returning Series">
+                          Returning Series
+                        </option>
+                        <option value="Ended">Ended</option>
                         <option value="In Production">In Production</option>
-                        <option value="Post Production">Post Production</option>
                         <option value="Planned">Planned</option>
                       </select>
                     </div>
@@ -334,12 +368,12 @@ const CreateMovie = () => {
                         className={`block ${labelClass} text-sm font-medium mb-2 flex items-center`}
                       >
                         <Clock className="mr-2 h-4 w-4" />
-                        Runtime (min)
+                        Episode Runtime (min)
                       </label>
                       <input
                         type="number"
-                        name="runtime"
-                        value={formData.runtime}
+                        name="episode_run_time"
+                        value={formData.episode_run_time}
                         onChange={handleChange}
                         min="0"
                         className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
@@ -347,7 +381,7 @@ const CreateMovie = () => {
                             ? "focus:ring-indigo-500"
                             : "focus:ring-blue-500"
                         } focus:border-transparent transition-all duration-200`}
-                        placeholder="120"
+                        placeholder="45"
                       />
                     </div>
                   </div>
@@ -370,12 +404,12 @@ const CreateMovie = () => {
                         ? "focus:ring-indigo-500"
                         : "focus:ring-blue-500"
                     } focus:border-transparent transition-all duration-200 h-32 resize-none`}
-                    placeholder="Write a brief overview of the movie..."
+                    placeholder="Write a brief overview of the TV show..."
                     required
                   />
                 </div>
 
-                {/* Movie Genres */}
+                {/* TV Show Genres */}
                 <div>
                   <label
                     className={`block ${labelClass} text-sm font-medium mb-2 flex items-center`}
@@ -458,7 +492,7 @@ const CreateMovie = () => {
                       className={`block ${labelClass} text-sm font-medium mb-2 flex items-center`}
                     >
                       <Camera className="mr-2 h-4 w-4" />
-                      Movie Poster
+                      Poster Image
                     </label>
                     <div
                       className={`relative border-2 border-dashed ${inputBorderClass} rounded-lg p-4 text-center ${
@@ -569,6 +603,53 @@ const CreateMovie = () => {
                   </div>
                 </div>
 
+                {/* Seasons and Episodes */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      className={`block ${labelClass} text-sm font-medium mb-2 flex items-center`}
+                    >
+                      <Clock className="mr-2 h-4 w-4" />
+                      Number of Seasons
+                    </label>
+                    <input
+                      type="number"
+                      name="number_of_seasons"
+                      value={formData.number_of_seasons}
+                      onChange={handleChange}
+                      min="0"
+                      className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
+                        isDarkMode
+                          ? "focus:ring-indigo-500"
+                          : "focus:ring-blue-500"
+                      } focus:border-transparent transition-all duration-200`}
+                      placeholder="1"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      className={`block ${labelClass} text-sm font-medium mb-2 flex items-center`}
+                    >
+                      <Clock className="mr-2 h-4 w-4" />
+                      Number of Episodes
+                    </label>
+                    <input
+                      type="number"
+                      name="number_of_episodes"
+                      value={formData.number_of_episodes}
+                      onChange={handleChange}
+                      min="0"
+                      className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
+                        isDarkMode
+                          ? "focus:ring-indigo-500"
+                          : "focus:ring-blue-500"
+                      } focus:border-transparent transition-all duration-200`}
+                      placeholder="10"
+                    />
+                  </div>
+                </div>
+
                 {/* Submit Button */}
                 <div className="mt-8 flex justify-end">
                   <button
@@ -604,8 +685,8 @@ const CreateMovie = () => {
                       </span>
                     ) : (
                       <span className="flex items-center">
-                        <Film className="mr-2 h-5 w-5" />
-                        Create Movie
+                        <Tv className="mr-2 h-5 w-5" />
+                        Update TV Show
                       </span>
                     )}
                   </button>
@@ -619,4 +700,4 @@ const CreateMovie = () => {
   );
 };
 
-export default CreateMovie;
+export default UpdateTvShow;

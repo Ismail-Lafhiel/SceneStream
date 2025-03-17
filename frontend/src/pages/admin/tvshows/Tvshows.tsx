@@ -24,6 +24,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash,
+  Pen,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useDarkMode } from "@/contexts/DarkModeContext";
@@ -551,7 +552,13 @@ const TVShows = () => {
                               : "text-slate-700 focus:bg-slate-50"
                           }
                         >
-                          Update TV show
+                          <Link
+                            to={`/admin/tvshows/edit/${tvShow.id}`}
+                            className="flex"
+                          >
+                            <Pen className="mr-2 h-4 w-4" />
+                            Update Tvshow
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className={

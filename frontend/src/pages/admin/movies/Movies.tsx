@@ -24,7 +24,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash,
-  Plus,
+  FilmIcon,
+  Pen,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useDarkMode } from "@/contexts/DarkModeContext";
@@ -337,7 +338,7 @@ const Movies = () => {
                 : "bg-blue-500 hover:bg-blue-600"
             } text-white cursor-pointer rounded-full`}
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <FilmIcon className="h-4 w-4 mr-2" />
             Add Movie
           </Button>
         </Link>
@@ -551,7 +552,10 @@ const Movies = () => {
                               : "text-slate-700 focus:bg-slate-50"
                           }
                         >
-                          Update Movie
+                          <Link to={`/admin/movies/edit/${movie.id}`} className="flex">
+                            <Pen className="mr-2 h-4 w-4" />
+                            Update Movie
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className={

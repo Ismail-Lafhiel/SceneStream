@@ -6,8 +6,10 @@ import CreateGenre from "@/pages/admin/genres/CreateGenre";
 import Genres from "@/pages/admin/genres/Genres";
 import CreateMovie from "@/pages/admin/movies/CreateMovie";
 import Movies from "@/pages/admin/movies/Movies";
+import UpdateMovie from "@/pages/admin/movies/UpdateMovie";
 import CreateTvShow from "@/pages/admin/tvshows/CreateTvShow";
 import TVShows from "@/pages/admin/tvshows/Tvshows";
+import UpdateTvShow from "@/pages/admin/tvshows/UpdateTvshow";
 import Users from "@/pages/admin/users/Users";
 
 const adminRoutes = [
@@ -31,12 +33,20 @@ const adminRoutes = [
         element: <CreateMovie />,
       },
       {
+        path: "movies/edit/:id",
+        element: <UpdateMovie />,
+      },
+      {
         path: "tvshows",
         element: <TVShows />,
       },
       {
         path: "tvshows/create",
         element: <CreateTvShow />,
+      },
+      {
+        path: "tvshows/edit/:id",
+        element: <UpdateTvShow />,
       },
       {
         path: "genres",

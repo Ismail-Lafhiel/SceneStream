@@ -72,24 +72,17 @@ export const movieService = {
     // Clone to avoid modifying the original
     const updateData: any = { ...movieData };
 
-    // Handle genre IDs
-    if ("genres" in updateData && updateData.genres) {
-      const genreIds = updateData.genres.map((g: any) => g.id);
+    // Handle genre ids
+    if ("genre_ids" in updateData && updateData.genre_ids) {
+      const genreIds = updateData.genre_ids
+        .map((genre: any) => (typeof genre === "object" ? genre.id : genre))
+        .filter((id: any) => !isNaN(id));
+
+      // Find corresponding ObjectIds in the database
       const genreDocuments = await Genre.find({ id: { $in: genreIds } });
       const genreObjectIds = genreDocuments.map((genre) => genre._id);
 
       updateData.genre_ids = genreObjectIds;
-      delete updateData.genres;
-    } else if ("genre_ids" in updateData && updateData.genre_ids) {
-      if (
-        updateData.genre_ids.length > 0 &&
-        typeof updateData.genre_ids[0] === "number"
-      ) {
-        const genreDocuments = await Genre.find({
-          id: { $in: updateData.genre_ids },
-        });
-        updateData.genre_ids = genreDocuments.map((genre) => genre._id);
-      }
     }
 
     // Find the existing movie to delete old files from S3

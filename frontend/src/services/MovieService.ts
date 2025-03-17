@@ -65,6 +65,41 @@ export const getMovies = async (params = {}) => {
   }
 };
 
+export const getMovieById = async (id) => {
+  try {
+    const token = await getAuthToken();
+
+    const response = await backendApi.get(`/movies/${id}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Get movie by ID error:", error);
+    throw new Error(error.response?.data?.message || "Failed to fetch movie");
+  }
+};
+
+export const updateMovie = async (id, movieData) => {
+  try {
+    const token = await getAuthToken();
+
+    if (!token) {
+      throw new Error("Authentication required");
+    }
+
+    const response = await backendApi.put(`/movies/${id}`, movieData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Update movie error:", error);
+    throw new Error(error.response?.data?.message || "Failed to update movie");
+  }
+};
+
 export const deleteMovie = async (id) => {
   try {
     const token = await getAuthToken();

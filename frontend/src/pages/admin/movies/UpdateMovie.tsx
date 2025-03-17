@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDarkMode } from "@/contexts/DarkModeContext";
-import { createMovie } from "@/services/MovieService";
+import { updateMovie, getMovieById } from "@/services/MovieService";
+import { getGenres } from "@/services/GenreService";
 import {
   Camera,
   Film,
@@ -14,9 +15,9 @@ import {
   Clock,
   Info,
 } from "lucide-react";
-import { getGenres } from "@/services/GenreService";
 
-const CreateMovie = () => {
+const UpdateMovie = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { isDarkMode } = useDarkMode();
@@ -40,22 +41,45 @@ const CreateMovie = () => {
   const [genres, setGenres] = useState([]);
   const [selectedGenres, setSelectedGenres] = useState([]);
 
-  // Fetch available genres on component mount
+  // Fetch available genres and existing movie data on component mount
   useEffect(() => {
-    const fetchGenres = async () => {
+    const fetchData = async () => {
       try {
-        const response = await getGenres({ page: 1, limit: 100 });
-        // Extract the genres array from the response
-        const genresData = response.results || [];
+        const [genresResponse, movieResponse] = await Promise.all([
+          getGenres({ page: 1, limit: 100 }),
+          getMovieById(id),
+        ]);
+
+        const genresData = genresResponse.results || [];
         setGenres(genresData);
+
+        if (movieResponse) {
+          setFormData({
+            title: movieResponse.title,
+            overview: movieResponse.overview,
+            release_date: movieResponse.release_date,
+            poster_path: movieResponse.poster_path,
+            backdrop_path: movieResponse.backdrop_path,
+            genre_ids: movieResponse.genre_ids,
+            tagline: movieResponse.tagline,
+            status: movieResponse.status,
+            runtime: movieResponse.runtime,
+            vote_average: movieResponse.vote_average,
+            vote_count: movieResponse.vote_count,
+          });
+
+          setSelectedGenres(movieResponse.genre_ids);
+          setPosterPreview(movieResponse.poster_path);
+          setBackdropPreview(movieResponse.backdrop_path);
+        }
       } catch (err) {
-        console.error("Failed to fetch genres", err);
-        setError("Failed to load genres. Please try again later.");
+        console.error("Failed to fetch data", err);
+        setError("Failed to load data. Please try again later.");
       }
     };
 
-    fetchGenres();
-  }, []);
+    fetchData();
+  }, [id]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -66,7 +90,6 @@ const CreateMovie = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Handle numeric fields
     if (
       name === "runtime" ||
       name === "vote_average" ||
@@ -91,7 +114,6 @@ const CreateMovie = () => {
       [e.target.name]: file,
     });
 
-    // Create preview URL
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       if (e.target.name === "poster_path") {
@@ -129,6 +151,8 @@ const CreateMovie = () => {
 
     try {
       const formDataToSend = new FormData();
+
+      // Append basic fields
       formDataToSend.append("title", formData.title);
       formDataToSend.append("overview", formData.overview);
       formDataToSend.append("release_date", formData.release_date);
@@ -138,30 +162,34 @@ const CreateMovie = () => {
       formDataToSend.append("vote_average", formData.vote_average);
       formDataToSend.append("vote_count", formData.vote_count);
 
-      // Append each genre ID individually
-      selectedGenres.forEach((genreId) => {
-        formDataToSend.append("genre_ids[]", genreId);
+      // Append genre_ids as an array of numbers
+      selectedGenres.forEach((genre) => {
+        formDataToSend.append("genre_ids[]", genre.id);
       });
 
+      // Append image files if they exist
       if (formData.poster_path) {
         formDataToSend.append("poster_path", formData.poster_path);
       }
-
       if (formData.backdrop_path) {
         formDataToSend.append("backdrop_path", formData.backdrop_path);
       }
 
-      const response = await createMovie(formDataToSend);
-      navigate('/admin/movies');
+      // Log the payload for debugging
+      console.log([...formDataToSend.entries()]);
+
+      // Send the request
+      const response = await updateMovie(id, formDataToSend);
+      navigate("/admin/movies");
     } catch (err) {
-      setError(err.message || "Failed to create movie");
+      setError(err.message || "Failed to update movie");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleLogin = () => {
-    navigate("/login", { state: { returnUrl: "/create-movie" } });
+    navigate("/login", { state: { returnUrl: `/update-movie/${id}` } });
   };
 
   // Dynamic classes based on dark mode
@@ -198,9 +226,7 @@ const CreateMovie = () => {
           >
             <div className="flex items-center">
               <Film className="mr-3 h-8 w-8 text-white" />
-              <h1 className="text-3xl font-bold text-white">
-                Create New Movie
-              </h1>
+              <h1 className="text-3xl font-bold text-white">Update Movie</h1>
             </div>
           </div>
 
@@ -223,7 +249,7 @@ const CreateMovie = () => {
                     }`}
                   />
                   <p className="mt-4 mb-6 text-lg">
-                    You need to be logged in to create a movie.
+                    You need to be logged in to update a movie.
                   </p>
                   <button
                     onClick={handleLogin}
@@ -605,7 +631,7 @@ const CreateMovie = () => {
                     ) : (
                       <span className="flex items-center">
                         <Film className="mr-2 h-5 w-5" />
-                        Create Movie
+                        Update Movie
                       </span>
                     )}
                   </button>
@@ -619,4 +645,4 @@ const CreateMovie = () => {
   );
 };
 
-export default CreateMovie;
+export default UpdateMovie;

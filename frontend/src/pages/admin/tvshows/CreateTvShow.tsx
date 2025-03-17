@@ -45,7 +45,9 @@ const CreateTvShow = () => {
   useEffect(() => {
     const fetchGenres = async () => {
       try {
-        const genresData = await getGenres();
+        const response = await getGenres({ page: 1, limit: 100 });
+        // Extract the genres array from the response
+        const genresData = response.results || [];
         setGenres(genresData);
       } catch (err) {
         console.error("Failed to fetch genres", err);
