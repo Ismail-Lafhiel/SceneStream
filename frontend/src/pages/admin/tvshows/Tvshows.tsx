@@ -25,6 +25,7 @@ import {
   ChevronRight,
   Trash,
   Pen,
+  Eye,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useDarkMode } from "@/contexts/DarkModeContext";
@@ -543,7 +544,13 @@ const TVShows = () => {
                               : "text-slate-700 focus:bg-slate-50"
                           }
                         >
-                          View details
+                          <Link
+                            to={`/admin/tvshows/details/${tvShow.id}`}
+                            className="flex"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View details
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className={
@@ -557,7 +564,7 @@ const TVShows = () => {
                             className="flex"
                           >
                             <Pen className="mr-2 h-4 w-4" />
-                            Update Tvshow
+                            Update tvshow
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -569,7 +576,7 @@ const TVShows = () => {
                           onClick={() => openDeleteDialog(tvShow)}
                         >
                           <Trash className="mr-2 h-4 w-4" />
-                          Delete TV show
+                          Delete tvshow
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

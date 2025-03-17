@@ -26,6 +26,7 @@ import {
   Trash,
   FilmIcon,
   Pen,
+  Eye,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useDarkMode } from "@/contexts/DarkModeContext";
@@ -543,7 +544,13 @@ const Movies = () => {
                               : "text-slate-700 focus:bg-slate-50"
                           }
                         >
-                          View details
+                          <Link
+                            to={`/admin/movies/details/${movie.id}`}
+                            className="flex"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View details
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className={
@@ -552,9 +559,12 @@ const Movies = () => {
                               : "text-slate-700 focus:bg-slate-50"
                           }
                         >
-                          <Link to={`/admin/movies/edit/${movie.id}`} className="flex">
+                          <Link
+                            to={`/admin/movies/edit/${movie.id}`}
+                            className="flex"
+                          >
                             <Pen className="mr-2 h-4 w-4" />
-                            Update Movie
+                            Update movie
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem

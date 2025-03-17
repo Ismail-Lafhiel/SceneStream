@@ -26,6 +26,7 @@ import {
   Trash,
   Edit,
   Pen,
+  Eye,
 } from "lucide-react";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { getGenres, deleteGenre } from "@/services/GenreService";
@@ -470,11 +471,26 @@ const Genres = () => {
                           }
                         >
                           <Link
+                            to={`/admin/genres/details/${genre.id}`}
+                            className="flex"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View details
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className={
+                            isDarkMode
+                              ? "text-slate-300 focus:bg-slate-800"
+                              : "text-slate-700 focus:bg-slate-50"
+                          }
+                        >
+                          <Link
                             to={`/admin/genres/edit/${genre.id}`}
                             className="flex"
                           >
                             <Pen className="mr-2 h-4 w-4" />
-                            Update Genre
+                            Update genre
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -486,7 +502,7 @@ const Genres = () => {
                           onClick={() => openDeleteDialog(genre)}
                         >
                           <Trash className="mr-2 h-4 w-4" />
-                          Delete Genre
+                          Delete genre
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
