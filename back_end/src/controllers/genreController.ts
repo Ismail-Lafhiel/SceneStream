@@ -13,6 +13,20 @@ export const getGenres = async (req: Request, res: Response) => {
   }
 };
 
+export const getGenre = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const genre = await genreService.getGenre(Number(id));
+    if (!genre) {
+      throw new AppError(404, "Genre not found");
+    }
+    res.json(genre);
+  } catch (error) {
+    console.error("Error fetching genre:", error);
+    res.status(500).json({ error: "Failed to fetch genre" });
+  }
+};
+
 export const addGenre = async (req: Request, res: Response) => {
   const genreData = req.body;
   try {

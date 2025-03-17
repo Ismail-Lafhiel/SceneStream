@@ -25,6 +25,7 @@ import {
   Plus,
   Trash,
   Edit,
+  Pen,
 } from "lucide-react";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { getGenres, deleteGenre } from "@/services/GenreService";
@@ -464,12 +465,17 @@ const Genres = () => {
                         <DropdownMenuItem
                           className={
                             isDarkMode
-                              ? "text-slate-300 hover:bg-slate-700"
-                              : "text-slate-700 hover:bg-slate-100"
+                              ? "text-slate-300 focus:bg-slate-800"
+                              : "text-slate-700 focus:bg-slate-50"
                           }
                         >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit Genre
+                          <Link
+                            to={`/admin/genres/edit/${genre.id}`}
+                            className="flex"
+                          >
+                            <Pen className="mr-2 h-4 w-4" />
+                            Update Genre
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className={

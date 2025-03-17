@@ -20,6 +20,11 @@ export const genreService = {
     };
   },
 
+  getGenre: async (id: number): Promise<IGenre | null> => {
+    const genre = await Genre.findOne({ id });
+    return genre;
+  },
+
   addGenre: async (genreData: IGenre) => {
     // Generate a unique ID (e.g., using a counter or UUID)
     const lastGenre = await Genre.findOne().sort({ id: -1 }); // Get the last genre

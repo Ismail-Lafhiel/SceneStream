@@ -4,6 +4,7 @@ import AdminGuard from "@/guards/AdminGuard";
 import Dashboard from "@/pages/admin/Dashboard";
 import CreateGenre from "@/pages/admin/genres/CreateGenre";
 import Genres from "@/pages/admin/genres/Genres";
+import UpdateGenre from "@/pages/admin/genres/UpdateGenre";
 import CreateMovie from "@/pages/admin/movies/CreateMovie";
 import Movies from "@/pages/admin/movies/Movies";
 import UpdateMovie from "@/pages/admin/movies/UpdateMovie";
@@ -55,6 +56,10 @@ const adminRoutes = [
       {
         path: "genres/create",
         element: <CreateGenre />,
+      },
+      {
+        path: "genres/edit/:id",
+        element: <UpdateGenre />,
       },
     ],
   },

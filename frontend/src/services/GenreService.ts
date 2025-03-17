@@ -65,6 +65,47 @@ export const getGenres = async (params = {}) => {
   }
 };
 
+export const getGenre = async (id) => {
+  try {
+    const token = await getAuthToken();
+
+    if (!token) {
+      throw new Error("Authentication required");
+    }
+
+    const response = await backendApi.get(`/genres/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Get genre error:", error);
+    throw new Error(error.response?.data?.message || "Failed to fetch genre");
+  }
+};
+
+export const updateGenre = async (id, genreData) => {
+  try {
+    const token = await getAuthToken();
+
+    if (!token) {
+      throw new Error("Authentication required");
+    }
+
+    const response = await backendApi.put(`/genres/${id}`, genreData, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Update genre error:", error);
+    throw new Error(error.response?.data?.message || "Failed to update genre");
+  }
+};
+
 export const deleteGenre = async (id) => {
   try {
     const token = await getAuthToken();
