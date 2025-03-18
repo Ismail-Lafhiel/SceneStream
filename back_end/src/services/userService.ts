@@ -3,7 +3,6 @@ import {
     ListUsersCommand,
     AdminListGroupsForUserCommand,
     ListUsersCommandInput,
-    UserType,
     AttributeType,
     GroupType,
   } from '@aws-sdk/client-cognito-identity-provider';
@@ -45,7 +44,7 @@ import {
         const command = new ListUsersCommand(params);
         const result = await client.send(command);
   
-        // Process users and ensure they're in our database
+        // Process users and ensure they're in the database
         for (const cognitoUser of result.Users || []) {
           const attributes: Record<string, string> = {};
           cognitoUser.Attributes?.forEach((attr: AttributeType) => {
@@ -69,19 +68,19 @@ import {
           const groupsResult = await client.send(groupsCommand);
           const groups = (groupsResult.Groups || []).map((group: GroupType) => group.GroupName);
   
-          // Find or create user in our database
+          // Find or create user in the database
           let user = await User.findOne({ cognitoId: userData.cognitoId });
   
           if (!user) {
             user = new User({
               ...userData,
-              role: groups.includes('ADMIN') ? 'ADMIN' : 'USER', // Set role based on groups
+              role: groups.includes('ADMIN') ? 'ADMIN' : 'USER',
             });
             await user.save();
           } else if (
             user.email !== userData.email ||
             user.name !== userData.name ||
-            user.role !== (groups.includes('ADMIN') ? 'ADMIN' : 'USER') // Update if role differs
+            user.role !== (groups.includes('ADMIN') ? 'ADMIN' : 'USER')
           ) {
             user.email = userData.email;
             user.name = userData.name;

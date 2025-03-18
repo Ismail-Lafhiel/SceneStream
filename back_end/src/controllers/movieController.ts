@@ -36,7 +36,7 @@ export const addMovie = [
         movieData.genre_ids = [];
       }
 
-      console.log("Received movie data:", movieData); // Log the received data
+      // console.log("Received movie data:", movieData);
       const movie = await movieService.addMovie(movieData);
       res.status(201).json(movie);
     } catch (error) {

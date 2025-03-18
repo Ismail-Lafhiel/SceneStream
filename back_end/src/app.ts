@@ -9,14 +9,14 @@ import * as userService from './services/userService';
 const app = express();
 
 // Middleware
-app.use(cors()); // Enable CORS
-app.use(express.json()); // Parse JSON bodies
-app.use(logger); // Log requests
-app.use(morgan('dev')); // HTTP request logger
+app.use(cors());
+app.use(express.json());
+app.use(logger);
+app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Sync users from Cognito to MongoDB when the app starts
+// Sync users from Cognito to MongoDB
 userService
   .syncUsersFromCognito()
   .then(() => {

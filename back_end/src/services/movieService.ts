@@ -24,7 +24,7 @@ export const movieService = {
     };
   },
 
-  // Fetch a movie by ID from the database
+  // Fetch a movie by id from the database
   getMovieById: async (id: number): Promise<IMovie | null> => {
     const movie = await Movie.findOne({ id }).populate("genre_ids");
     return movie;
@@ -34,8 +34,8 @@ export const movieService = {
   addMovie: async (movieData: ITMDBMovie) => {
     try {
       // Generate a unique ID
-      const lastMovie = await Movie.findOne().sort({ id: -1 }); // Find the movie with the highest ID
-      const newId = lastMovie ? lastMovie.id + 1 : 1; // Increment the highest ID by 1 or start with 1
+      const lastMovie = await Movie.findOne().sort({ id: -1 }); // Find the movie with the highest id
+      const newId = lastMovie ? lastMovie.id + 1 : 1; // Increment the highest id by 1 or start with 1
 
       // Ensure genre_ids is an array of numbers
       const genreIds = Array.isArray(movieData.genre_ids)
@@ -49,10 +49,10 @@ export const movieService = {
       // Remove fields that don't match our model
       const { genre_ids, genres: genresData, ...movieDataClean } = movieData;
 
-      // Create new movie with properly typed genre_ids and generated ID
+      // Create new movie with properly typed genre_ids and generated id
       const movie = new Movie({
         ...movieDataClean,
-        id: newId, // Assign the generated ID
+        id: newId, // Assign the generated id
         genre_ids: genreObjectIds,
       });
 
