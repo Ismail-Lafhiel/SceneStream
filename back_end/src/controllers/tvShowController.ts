@@ -35,7 +35,7 @@ export const addTVShow = [
         tvShowData.genre_ids = [];
       }
 
-      console.log("Received TV show data:", tvShowData); // Log the received data
+      // console.log("Received TV show data:", tvShowData);
       const tvShow = await tvService.addTVShow(tvShowData);
       res.status(201).json(tvShow);
     } catch (error) {

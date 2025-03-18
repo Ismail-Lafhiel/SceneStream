@@ -7,6 +7,9 @@ import config from "../config/config";
 import { ITMDBMovie, ITMDBTVShow } from "../interfaces";
 
 const { mongoURI } = config;
+const BASE_IMAGE_URL = "https://image.tmdb.org/t/p/w500";
+const BATCH_SIZE = 20;
+const DELAY_MS = 1000;
 
 // Connect to MongoDB
 mongoose
@@ -20,61 +23,113 @@ mongoose
     process.exit(1);
   });
 
-// Seed the database
+process.on("exit", async () => {
+  await mongoose.disconnect();
+  console.log("Disconnected from MongoDB");
+});
+
+const ensureImageUrl = (path: string | null | undefined): string | null => {
+  if (!path) return null;
+  return path.startsWith(BASE_IMAGE_URL) ? path : `${BASE_IMAGE_URL}${path}`;
+};
+
+const processInBatches = async <T>(
+  operations: T[],
+  model: mongoose.Model<any>,
+  mediaType: string
+) => {
+  for (let i = 0; i < operations.length; i += BATCH_SIZE) {
+    const batch = operations.slice(i, i + BATCH_SIZE);
+    try {
+      //@ts-ignore
+      await model.bulkWrite(batch);
+      console.log(
+        `Processed ${i + batch.length}/${
+          operations.length
+        } ${mediaType} entries`
+      );
+      await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
+    } catch (batchError) {
+      console.error(
+        `Error processing ${mediaType} batch ${i / BATCH_SIZE + 1}:`,
+        batchError
+      );
+    }
+  }
+};
+
 const seedDatabase = async () => {
   try {
-    // Ensure seeding only runs in development
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Seed script cannot run in production!");
+    }
+
     if (process.env.NODE_ENV !== "development") {
       console.error("Seeding is only allowed in development environment.");
       process.exit(1);
     }
 
-    // Fetch and save genres
+    // Seed Genres
     const movieGenres = await genreService.getMovieGenres();
     const tvGenres = await genreService.getTvGenres();
     const allGenres = [...movieGenres, ...tvGenres];
 
-    for (const genre of allGenres) {
-      await Genre.findOneAndUpdate({ id: genre.id }, genre, { upsert: true });
-    }
-    console.log("Genres seeded successfully.");
+    const genreOperations = allGenres.map((genre) => ({
+      updateOne: {
+        filter: { id: genre.id },
+        update: { $set: genre },
+        upsert: true,
+      },
+    }));
 
-    // Fetch and save popular movies
+    await Genre.bulkWrite(genreOperations);
+    console.log(`Seeded ${allGenres.length} genres`);
+
+    // Seed Movies
     const popularMovies = await movieService.getPopularMovies();
-    console.log(`Seeding ${popularMovies.results.length} movies...`);
+    console.log(`Processing ${popularMovies.results.length} movies...`);
 
-    const moviesToSave = await Promise.all(
+    const movieOperations = await Promise.all(
       popularMovies.results.map(async (movie) => {
         try {
-          const movieDetails = await movieService.getMovieDetails(movie.id) as ITMDBMovie;
-          
-          // Get genre IDs from either genres array or genre_ids
-          const genreIds = movieDetails.genres
-            ? movieDetails.genres.map((g) => g.id)
-            : (movieDetails.genre_ids || []);
-            
-          console.log(`Movie ${movieDetails.title} (${movie.id}) genres:`, genreIds);
-          
-          const genres = await Genre.find({ id: { $in: genreIds } });
-          console.log(`Found ${genres.length} matching genres in database`);
-          
-          const genreObjectIds = genres.map((genre) => genre._id);
+          const movieDetails = (await movieService.getMovieDetails(
+            movie.id
+          )) as ITMDBMovie;
+          const genreIds =
+            movieDetails.genres?.map((g) => g.id) ||
+            movieDetails.genre_ids ||
+            [];
 
-          // Remove genre_ids and genres to avoid type conflicts
-          const { genre_ids, genres: _, ...movieWithoutGenres } = movieDetails;
+          const genres = await Genre.find({ id: { $in: genreIds } });
+          const missingGenres = genreIds.filter(
+            (id) => !genres.some((g) => g.id === id)
+          );
+          if (missingGenres.length > 0) {
+            console.warn(
+              `Movie ${movie.id} has unknown genre IDs:`,
+              missingGenres
+            );
+          }
+
+          const { genre_ids, genres: _, ...cleanMovie } = movieDetails;
+          const backdrop_path = ensureImageUrl(cleanMovie.backdrop_path);
+          const poster_path = ensureImageUrl(cleanMovie.poster_path);
 
           return {
             updateOne: {
               filter: { id: movieDetails.id },
-              update: { 
-                $set: { 
-                  ...movieWithoutGenres,
-                  genre_ids: genreObjectIds 
-                } 
+              update: {
+                $set: {
+                  ...cleanMovie,
+                  backdrop_path,
+                  poster_path,
+                  genre_ids: genres.map((g) => g._id),
+                  media_type: "movie",
+                },
               },
               upsert: true,
             },
-          } as const;  // Using const assertion for type stability
+          };
         } catch (error) {
           console.error(`Error processing movie ${movie.id}:`, error);
           return null;
@@ -82,52 +137,55 @@ const seedDatabase = async () => {
       })
     );
 
-    // Filter out null values and type assert the array
-    const validMovieOperations = moviesToSave.filter((op): op is NonNullable<typeof op> => op !== null);
-    
-    if (validMovieOperations.length > 0) {
-      await Movie.bulkWrite(validMovieOperations);
-      console.log(`${validMovieOperations.length} movies seeded successfully.`);
-    } else {
-      console.log("No valid movies to seed.");
-    }
+    const validMovieOps = movieOperations.filter(
+      Boolean
+    ) as mongoose.AnyBulkWriteOperation[];
+    await processInBatches(validMovieOps, Movie, "movies");
+    console.log(`Processed ${validMovieOps.length} movies`);
 
-    // Fetch and save popular TV shows
+    // Seed TV Shows
     const popularTVShows = await tvService.getPopularTvShows();
-    console.log(`Seeding ${popularTVShows.results.length} TV shows...`);
+    console.log(`Processing ${popularTVShows.results.length} TV shows...`);
 
-    const tvShowsToSave = await Promise.all(
+    const tvOperations = await Promise.all(
       popularTVShows.results.map(async (tvShow) => {
         try {
-          const tvShowDetails = await tvService.getTvShowDetails(tvShow.id) as ITMDBTVShow;
-          
-          // Get genre IDs from either genres array or genre_ids
-          const genreIds = tvShowDetails.genres
-            ? tvShowDetails.genres.map((g) => g.id)
-            : (tvShowDetails.genre_ids || []);
-            
-          console.log(`TV Show ${tvShowDetails.name} (${tvShow.id}) genres:`, genreIds);
-          
-          const genres = await Genre.find({ id: { $in: genreIds } });
-          console.log(`Found ${genres.length} matching genres in database`);
-          
-          const genreObjectIds = genres.map((genre) => genre._id);
+          const tvDetails = (await tvService.getTvShowDetails(
+            tvShow.id
+          )) as ITMDBTVShow;
+          const genreIds =
+            tvDetails.genres?.map((g) => g.id) || tvDetails.genre_ids || [];
 
-          // Remove genre_ids and genres to avoid type conflicts
-          const { genre_ids, genres: _, ...tvShowWithoutGenres } = tvShowDetails;
+          const genres = await Genre.find({ id: { $in: genreIds } });
+          const missingGenres = genreIds.filter(
+            (id) => !genres.some((g) => g.id === id)
+          );
+          if (missingGenres.length > 0) {
+            console.warn(
+              `TV Show ${tvShow.id} has unknown genre IDs:`,
+              missingGenres
+            );
+          }
+
+          const { genre_ids, genres: _, ...cleanTV } = tvDetails;
+          const backdrop_path = ensureImageUrl(cleanTV.backdrop_path);
+          const poster_path = ensureImageUrl(cleanTV.poster_path);
 
           return {
             updateOne: {
-              filter: { id: tvShowDetails.id },
-              update: { 
-                $set: { 
-                  ...tvShowWithoutGenres,
-                  genre_ids: genreObjectIds 
-                } 
+              filter: { id: tvDetails.id },
+              update: {
+                $set: {
+                  ...cleanTV,
+                  backdrop_path,
+                  poster_path,
+                  genre_ids: genres.map((g) => g._id),
+                  media_type: "tv",
+                },
               },
               upsert: true,
             },
-          } as const;  // Using const assertion for type stability
+          };
         } catch (error) {
           console.error(`Error processing TV show ${tvShow.id}:`, error);
           return null;
@@ -135,19 +193,15 @@ const seedDatabase = async () => {
       })
     );
 
-    // Filter out null values and type assert the array
-    const validTvShowOperations = tvShowsToSave.filter((op): op is NonNullable<typeof op> => op !== null);
-    
-    if (validTvShowOperations.length > 0) {
-      await TVShow.bulkWrite(validTvShowOperations);
-      console.log(`${validTvShowOperations.length} TV shows seeded successfully.`);
-    } else {
-      console.log("No valid TV shows to seed.");
-    }
+    const validTVOps = tvOperations.filter(
+      Boolean
+    ) as mongoose.AnyBulkWriteOperation[];
+    await processInBatches(validTVOps, TVShow, "TV shows");
+    console.log(`Processed ${validTVOps.length} TV shows`);
 
     process.exit(0);
   } catch (error) {
-    console.error("Error seeding database:", error);
+    console.error("Seeding failed:", error);
     process.exit(1);
   }
 };

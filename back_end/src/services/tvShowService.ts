@@ -43,7 +43,6 @@ export const tvService = {
       // Remove fields that don't match our model
       const { genre_ids, genres: genresData, ...tvShowDataClean } = tvShowData;
 
-      // Create new TV show with properly typed genre_ids and generated ID
       const tvShow = new TVShow({
         ...tvShowDataClean,
         id: newId,
@@ -74,7 +73,7 @@ export const tvService = {
 
     // Handle genre ids
     if ("genre_ids" in updateData && updateData.genre_ids) {
-      // Ensure genre_ids is an array of numbers
+      // genre_ids is an array of numbers
       const genreIds = updateData.genre_ids
         .map((genre: any) => (typeof genre === "object" ? genre.id : genre))
         .filter((id: any) => !isNaN(id));

@@ -28,10 +28,10 @@ export const genreService = {
   addGenre: async (genreData: IGenre) => {
     // Generate a unique ID (e.g., using a counter or UUID)
     const lastGenre = await Genre.findOne().sort({ id: -1 }); // Get the last genre
-    const newId = lastGenre ? lastGenre.id + 1 : 1; // Increment the ID
+    const newId = lastGenre ? lastGenre.id + 1 : 1; // Increment the id
 
     const genre = new Genre({
-      id: newId, // Automatically assign the new ID
+      id: newId, // Automatically assign the new id
       name: genreData.name,
     });
 
