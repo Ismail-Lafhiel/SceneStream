@@ -28,12 +28,12 @@ jobs:
       # Build the Docker image
       - name: Build Docker image
         run: |
-          docker build -t ismaillf/sceneStream:latest ./back_end
+          docker build -t ismaillf/scene_stream:latest ./back_end
 
       # Push the Docker image to Docker Hub
       - name: Push Docker image
         run: |
-          docker push ismaillf/sceneStream:latest
+          docker push ismaillf/scene_stream:latest
 
       # Deploy to EC2
       - name: Deploy to EC2
@@ -44,11 +44,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/app
-            docker stop sceneStream_backend || true
-            docker rm sceneStream_backend || true
-            docker pull ismaillf/sceneStream:latest
+            docker stop scene_stream_backend || true
+            docker rm scene_stream_backend || true
+            docker pull ismaillf/scene_stream:latest
             docker run -d \
-              --name sceneStream_backend \
+              --name scene_stream_backend \
               -p 5000:5000 \
               --env-file ./back_end/.env \
-              ismaillf/sceneStream:latest
+              ismaillf/scene_stream:latest
