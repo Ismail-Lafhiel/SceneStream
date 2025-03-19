@@ -1,10 +1,12 @@
+// Mock the userService
+jest.mock("../../src/services/userService", () => ({
+  getUsersData: jest.fn(),
+}));
+
 import { Request, Response } from "express";
 import { getUsers } from "../../src/controllers/userController";
 import { getUsersData } from "../../src/services/userService";
 import { AppError } from "../../src/utils/errors";
-
-// Mock the userService
-jest.mock("../../src/services/userService");
 
 describe("UserController", () => {
   let req: Request;

@@ -3,9 +3,6 @@ import { tvService } from "../../src/services/tvShowService";
 import {
   getTVShows,
   getTVShowById,
-  addTVShow,
-  updateTVShow,
-  deleteTVShow,
 } from "../../src/controllers/tvShowController";
 import { AppError } from "../../src/utils/errors";
 

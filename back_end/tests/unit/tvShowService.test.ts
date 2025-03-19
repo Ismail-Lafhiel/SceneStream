@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { tvService } from "../../src/services/tvShowService";
 import TVShow from "../../src/models/tvShow.model";
 import Genre from "../../src/models/genre.model";

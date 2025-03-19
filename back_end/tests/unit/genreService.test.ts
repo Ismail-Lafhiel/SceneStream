@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { genreService } from "../../src/services/genreService";
 import Genre from "../../src/models/genre.model";
 
