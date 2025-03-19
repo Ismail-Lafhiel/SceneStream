@@ -6,9 +6,36 @@ on:
       - SCEN-25-List-of-top-rated-movies
 
 jobs:
-  build-and-deploy:
+  test:
     runs-on: ubuntu-latest
+    steps:
+      # Checkout the code
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: './back_end/package-lock.json'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          cd back_end
+          npm ci
+
+      # Run tests
+      - name: Run tests
+        run: |
+          cd back_end
+          npm test
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
     steps:
       # Checkout the code
       - name: Checkout repository
