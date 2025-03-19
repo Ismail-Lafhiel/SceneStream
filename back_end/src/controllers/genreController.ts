@@ -2,18 +2,25 @@ import { Request, Response, NextFunction } from "express";
 import { genreService } from "../services/genreService";
 import { AppError } from "../utils/errors";
 
-export const getGenres = async (req: Request, res: Response, next: NextFunction) => {
+export const getGenres = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     const genres = await genreService.getAllGenres(Number(page), Number(limit));
     res.json(genres);
   } catch (error) {
-    console.error("Error fetching genres:", error);
     res.status(500).json({ error: "Failed to fetch genres" });
   }
 };
 
-export const getGenre = async (req: Request, res: Response, next: NextFunction) => {
+export const getGenre = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { id } = req.params;
   try {
     const genre = await genreService.getGenre(Number(id));
@@ -22,12 +29,15 @@ export const getGenre = async (req: Request, res: Response, next: NextFunction) 
     }
     res.json(genre);
   } catch (error) {
-    console.error("Error fetching genre:", error);
     res.status(500).json({ error: "Failed to fetch genre" });
   }
 };
 
-export const addGenre = async (req: Request, res: Response, next: NextFunction) => {
+export const addGenre = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const genreData = req.body;
   try {
     const genre = await genreService.addGenre(genreData);
@@ -37,7 +47,11 @@ export const addGenre = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-export const updateGenre = async (req: Request, res: Response, next: NextFunction) => {
+export const updateGenre = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { id } = req.params;
     const genreData = req.body;
@@ -51,7 +65,11 @@ export const updateGenre = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const deleteGenre = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteGenre = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { id } = req.params;
     await genreService.deleteGenre(Number(id));
