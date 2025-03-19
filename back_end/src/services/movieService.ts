@@ -34,8 +34,8 @@ export const movieService = {
   addMovie: async (movieData: ITMDBMovie) => {
     try {
       // Generate a unique ID
-      const lastMovie = await Movie.findOne().sort({ id: -1 }); // Find the movie with the highest id
-      const newId = lastMovie ? lastMovie.id + 1 : 1; // Increment the highest id by 1 or start with 1
+      const lastMovie = await Movie.findOne().sort({ id: -1 });
+      const newId = lastMovie ? lastMovie.id + 1 : 1;
 
       // Ensure genre_ids is an array of numbers
       const genreIds = Array.isArray(movieData.genre_ids)
