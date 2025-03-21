@@ -6,7 +6,7 @@ on:
       - SCEN-25-List-of-top-rated-movies
 
 jobs:
-  test:
+  test-backend:
     runs-on: ubuntu-latest
     steps:
       # Checkout the code
@@ -17,7 +17,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '20.x'
           cache: 'npm'
           cache-dependency-path: './back_end/package-lock.json'
 
@@ -33,8 +33,8 @@ jobs:
           cd back_end
           npm test
 
-  build-and-deploy:
-    needs: test
+  build-and-deploy-backend:
+    needs: test-backend
     runs-on: ubuntu-latest
     steps:
       # Checkout the code
@@ -52,15 +52,15 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      # Build the Docker image
-      - name: Build Docker image
-        run: |
-          docker build -t ismaillf/scene_stream:latest ./back_end
-
-      # Push the Docker image to Docker Hub
-      - name: Push Docker image
-        run: |
-          docker push ismaillf/scene_stream:latest
+      # Build and push the Docker image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./back_end
+          push: true
+          tags: ismaillf/scene_stream:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # Deploy to EC2
       - name: Deploy to EC2
@@ -79,3 +79,46 @@ jobs:
               -p 5000:5000 \
               --env-file ./back_end/.env \
               ismaillf/scene_stream:latest
+
+  # deploy-frontend:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Checkout the code
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+
+  #     # Install Vercel CLI
+  #     - name: Install Vercel CLI
+  #       run: npm install --global vercel@latest
+
+  #     # Setup Node.js
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: '20.x'
+  #         cache: 'npm'
+  #         cache-dependency-path: './frontend/package-lock.json'
+
+  #     # Install frontend dependencies
+  #     - name: Install frontend dependencies
+  #       run: |
+  #         cd frontend
+  #         npm ci
+
+  #     # Create .env file
+  #     - name: Setup Environment Variables
+  #       run: |
+  #         cd frontend
+  #         echo "VITE_APP_BACKEND_URL=${{ secrets.BACKEND_API_URL }}" > .env
+          
+  #     # Deploy to Vercel
+  #     - name: Deploy to Vercel
+  #       working-directory: ./frontend
+  #       env:
+  #         VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  #         VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  #         VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  #       run: |
+  #         vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+  #         vercel build --prod --token=$VERCEL_TOKEN
+  #         vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
