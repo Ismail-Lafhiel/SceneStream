@@ -9,11 +9,9 @@ jobs:
   test-backend:
     runs-on: ubuntu-latest
     steps:
-      # Checkout the code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -21,13 +19,11 @@ jobs:
           cache: 'npm'
           cache-dependency-path: './back_end/package-lock.json'
 
-      # Install dependencies
       - name: Install dependencies
         run: |
           cd back_end
           npm ci
 
-      # Run tests
       - name: Run tests
         run: |
           cd back_end
@@ -37,22 +33,18 @@ jobs:
     needs: test-backend
     runs-on: ubuntu-latest
     steps:
-      # Checkout the code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      # Build and push the Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -62,7 +54,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Deploy to EC2
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
         with:
@@ -70,12 +61,22 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            # Create app directory if it doesn't exist
+            mkdir -p ~/app
             cd ~/app
+
+            # Clean up old containers and images
             docker stop scene_stream_backend || true
             docker rm scene_stream_backend || true
+            docker system prune -f
+
+            # Pull latest image
             docker pull ismaillf/scene_stream:latest
+
+            # Create and run new container
             docker run -d \
               --name scene_stream_backend \
+              --restart unless-stopped \
               -p 5000:5000 \
               -e MONGO_URI="${{ secrets.MONGO_URI }}" \
               -e AWS_REGION="${{ secrets.AWS_REGION }}" \
@@ -87,7 +88,34 @@ jobs:
               -e TMDB_API_KEY="${{ secrets.TMDB_API_KEY }}" \
               -e TMDB_BASE_URL="${{ secrets.TMDB_BASE_URL }}" \
               -e API_PORT="5000" \
+              -e NODE_ENV="production" \
               ismaillf/scene_stream:latest
+
+            # Wait for container to start
+            sleep 10
+
+            # Check if container is running
+            if ! docker ps | grep -q scene_stream_backend; then
+              echo "Container failed to start"
+              docker logs scene_stream_backend
+              exit 1
+            fi
+
+            # Display container logs
+            echo "Container logs:"
+            docker logs scene_stream_backend
+
+            # Check container health
+            echo "Container status:"
+            docker inspect scene_stream_backend --format='{{.State.Status}}'
+
+            # Verify application is responding
+            if curl -f http://localhost:5000/health; then
+              echo "Application is responding"
+            else
+              echo "Application is not responding"
+              exit 1
+            fi
 
   # deploy-frontend:
   #   runs-on: ubuntu-latest
