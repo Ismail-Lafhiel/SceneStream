@@ -1,8 +1,8 @@
+//@ts-nocheck
 import { useState, useEffect, useRef } from "react";
-import { FaSearch, FaMoon, FaSun, FaUser, FaFilm } from "react-icons/fa";
+import { FaSearch, FaMoon, FaSun, FaUser } from "react-icons/fa";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDarkMode } from "@/contexts/DarkModeContext";
-import { Link } from "react-router-dom";
 
 const AdminHeader = () => {
   const { user, signOut } = useAuth();

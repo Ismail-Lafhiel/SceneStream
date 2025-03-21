@@ -3,6 +3,8 @@ export interface IVideo {
   key: string;
   name: string;
   site: string;
-  size: number;
   type: string;
+  size?: number;
+  official?: boolean;
+  published_at?: string;
 }

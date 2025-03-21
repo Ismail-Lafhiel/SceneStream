@@ -1,4 +1,3 @@
-// src/config/amplify.ts
 import { Amplify } from "aws-amplify";
 
 const region = import.meta.env.VITE_AWS_REGION;
@@ -34,7 +33,7 @@ const amplifyConfig = {
 
 try {
   Amplify.configure(amplifyConfig);
-  console.log("✅ Amplify configured successfully");
+  // console.log("✅ Amplify configured successfully");
 } catch (error) {
   console.error("❌ Error configuring Amplify:", error);
 }

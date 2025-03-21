@@ -1,4 +1,3 @@
-// src/pages/error/NotFound.tsx
 import { Link } from "react-router-dom";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { FaHome } from "react-icons/fa";

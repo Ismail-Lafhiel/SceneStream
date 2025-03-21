@@ -20,6 +20,8 @@ export const getMovies = async (
   }
 };
 
+
+
 export const getMovieById = async (
   req: Request,
   res: Response,

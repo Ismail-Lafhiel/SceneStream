@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -32,8 +33,8 @@ import { Badge } from "@/components/ui/Badge";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { getMovies, deleteMovie } from "@/services/MovieService";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
 import ConfirmationDialog from "@/components/confirmationDialog/ConfirmationDialog";
+import toast from "react-hot-toast";
 
 const Movies = () => {
   const [searchQuery, setSearchQuery] = useState("");

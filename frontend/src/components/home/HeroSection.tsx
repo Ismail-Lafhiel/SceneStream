@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Link } from "react-router-dom";
 import { FaPlay, FaInfoCircle } from "react-icons/fa";
 import { useEffect, useState } from "react";

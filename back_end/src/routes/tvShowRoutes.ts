@@ -6,15 +6,16 @@ import {
   deleteTVShow,
   addTVShow,
 } from "../controllers/tvShowController";
+import { checkAdminGroup, protect } from "../middlewares/authMiddleware";
 
 const router = express.Router();
 
-router.get("/", getTVShows);
+router.get("/", protect, checkAdminGroup, getTVShows);
 // @ts-ignore
-router.post("/", addTVShow);
-router.get("/:id", getTVShowById);
+router.post("/", protect, checkAdminGroup, addTVShow);
+router.get("/:id", protect, checkAdminGroup, getTVShowById);
 // @ts-ignore
-router.put("/:id", updateTVShow);
-router.delete("/:id", deleteTVShow);
+router.put("/:id", protect, checkAdminGroup, updateTVShow);
+router.delete("/:id", protect, checkAdminGroup, deleteTVShow);
 
 export default router;

@@ -1,4 +1,3 @@
-// utils/authUtils.ts
 import { jwtDecode } from "jwt-decode";
 
 /**

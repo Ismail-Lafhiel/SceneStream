@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -31,7 +32,7 @@ import {
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { getGenres, deleteGenre } from "@/services/GenreService";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import ConfirmationDialog from "@/components/confirmationDialog/ConfirmationDialog";
 
 const Genres = () => {

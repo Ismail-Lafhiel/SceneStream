@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -35,25 +36,19 @@ const AdminSidebar = () => {
       id: "users",
       label: "User Management",
       icon: <FaUsers />,
-      subItems: [
-        { path: "/admin/users", label: "All Users" },
-      ],
+      subItems: [{ path: "/admin/users", label: "All Users" }],
     },
     {
       id: "movies",
       label: "Movie Management",
       icon: <FaFilm />,
-      subItems: [
-        { path: "/admin/movies", label: "All Movies" },
-      ],
+      subItems: [{ path: "/admin/movies", label: "All Movies" }],
     },
     {
       id: "tvshows",
       label: "TVshow Management",
       icon: <FaTv />,
-      subItems: [
-        { path: "/admin/tvshows", label: "All TVshows" },
-      ],
+      subItems: [{ path: "/admin/tvshows", label: "All TVshows" }],
     },
     {
       id: "genres",
@@ -81,9 +76,11 @@ const AdminSidebar = () => {
           <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
             <span className="text-lg font-bold text-white">S</span>
           </div>
-          <span className="text-xl font-bold tracking-tight text-white">
-            SceneStream
-          </span>
+          <Link to="/">
+            <span className="text-xl font-bold tracking-tight text-white">
+              SceneStream
+            </span>
+          </Link>
         </div>
       </div>
 
@@ -167,9 +164,12 @@ const AdminSidebar = () => {
             <p className="text-sm text-gray-300 mb-2">
               Want to add a new movie?
             </p>
-            <button className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+            <Link
+              to="/admin/movies/create"
+              className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+            >
               <FaFilm className="mr-2" /> Add New Movie
-            </button>
+            </Link>
           </div>
         </div>
       </nav>

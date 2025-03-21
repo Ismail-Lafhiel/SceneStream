@@ -67,7 +67,10 @@ export const updateTVShow = [
     try {
       const { id } = req.params;
       const tvShowData = req.body;
-      const updatedTVShow = await tvService.updateTVShow(Number(id), tvShowData);
+      const updatedTVShow = await tvService.updateTVShow(
+        Number(id),
+        tvShowData
+      );
       if (!updatedTVShow) {
         throw new AppError(404, "TV show not found");
       }

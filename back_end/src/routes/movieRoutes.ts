@@ -1,21 +1,22 @@
-import express from 'express';
+import express from "express";
 import {
   getMovies,
   getMovieById,
   updateMovie,
   deleteMovie,
   addMovie,
-} from '../controllers/movieController';
+} from "../controllers/movieController";
+import { checkAdminGroup, protect } from "../middlewares/authMiddleware";
 
 const router = express.Router();
 
 // Apply routes
-router.get('/', getMovies);
+router.get("/", getMovies);
 // @ts-ignore
-router.post('/', addMovie);
-router.get('/:id', getMovieById);
+router.post("/", protect, checkAdminGroup, addMovie);
+router.get("/:id", protect, checkAdminGroup, getMovieById);
 // @ts-ignore
-router.put('/:id', updateMovie);
-router.delete('/:id', deleteMovie);
+router.put("/:id", protect, checkAdminGroup, updateMovie);
+router.delete("/:id", protect, checkAdminGroup, deleteMovie);
 
 export default router;

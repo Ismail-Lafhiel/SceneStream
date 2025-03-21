@@ -3,7 +3,6 @@ import {
   FaTwitter,
   FaInstagram,
   FaYoutube,
-  FaPlay,
 } from "react-icons/fa";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 

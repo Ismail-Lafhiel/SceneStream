@@ -71,7 +71,6 @@ export const MovieDetails = () => {
       // Add the bookmark
       await addBookmark("movie", movie);
 
-      // Success message is handled in the addBookmark function
     } catch (error: any) {
       console.error("Bookmark error:", error);
 

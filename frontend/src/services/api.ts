@@ -5,31 +5,21 @@ import {
   IPaginatedResponse,
   ITVShow,
   IVideo,
+  DiscoverParams,
+  TvShowDetailsInterface
 } from "@/interfaces";
-import { TVShowDetails } from "@/interfaces/utility.interface";
 
-interface DiscoverParams {
-  page?: number;
-  with_genres?: number | null;
-  sort_by?: string;
-  search?: string;
-}
+const BASE_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
-const tmdbApi = axios.create({
-  baseURL: "https://api.themoviedb.org/3",
-  params: {
-    api_key: import.meta.env.VITE_APP_TMDB_API_KEY,
-    language: "en-US",
-  },
+const apiClient = axios.create({
+  baseURL: `${BASE_URL}/tmdb`,
 });
-
-
 
 // movies api calls
 export const movieService = {
-  getPopularMovies: async (page = 1) => {
-    const { data } = await tmdbApi.get<IPaginatedResponse<IMovie>>(
-      "/movie/popular",
+  getPopularMovies: async (page = 1): Promise<IPaginatedResponse<IMovie>> => {
+    const { data } = await apiClient.get<IPaginatedResponse<IMovie>>(
+      "/movies/popular",
       {
         params: { page },
       }
@@ -37,36 +27,34 @@ export const movieService = {
     return data;
   },
 
-  getTrendingMovies: async (timeWindow: "day" | "week" = "week") => {
-    const { data } = await tmdbApi.get<IPaginatedResponse<IMovie>>(
-      `/trending/movie/${timeWindow}`
-    );
-    return data;
-  },
-
-  getMoviesByGenre: async (genreId: number, page = 1) => {
-    const { data } = await tmdbApi.get<IPaginatedResponse<IMovie>>(
-      "/discover/movie",
+  getTrendingMovies: async (timeWindow: "day" | "week" = "week"): Promise<IPaginatedResponse<IMovie>> => {
+    const { data } = await apiClient.get<IPaginatedResponse<IMovie>>(
+      `/movies/trending`,
       {
-        params: {
-          with_genres: genreId,
-          page,
-        },
+        params: { timeWindow }
       }
     );
     return data;
   },
 
-  getGenres: async () => {
-    const { data } = await tmdbApi.get<{ genres: IGenre[] }>(
-      "/genre/movie/list"
+  getMoviesByGenre: async (genreId: number, page = 1): Promise<IPaginatedResponse<IMovie>> => {
+    const { data } = await apiClient.get<IPaginatedResponse<IMovie>>(
+      `/movies/genre/${genreId}`,
+      {
+        params: { page }
+      }
     );
-    return data.genres;
+    return data;
   },
 
-  getNewReleases: async (page = 1) => {
-    const { data } = await tmdbApi.get<IPaginatedResponse<IMovie>>(
-      "/movie/now_playing",
+  getGenres: async (): Promise<IGenre[]> => {
+    const { data } = await apiClient.get<IGenre[]>("/genres/movies");
+    return data;
+  },
+
+  getNewReleases: async (page = 1): Promise<IPaginatedResponse<IMovie>> => {
+    const { data } = await apiClient.get<IPaginatedResponse<IMovie>>(
+      "/movies/new-releases",
       {
         params: { page },
       }
@@ -75,145 +63,128 @@ export const movieService = {
   },
 
   getMovieDetails: async (movieId: number) => {
-    const { data } = await tmdbApi.get(`/movie/${movieId}`, {
-      params: {
-        append_to_response: "credits,videos",
-      },
-    });
+    const { data } = await apiClient.get(`/movies/${movieId}`);
     return data;
   },
 
-  getSimilarMovies: async (movieId: number) => {
-    const { data } = await tmdbApi.get(`/movie/${movieId}/similar`);
-    return data;
-  },
-  getPopularTvShows: async (page = 1) => {
-    const { data } = await tmdbApi.get("/tv/popular", { params: { page } });
+  getSimilarMovies: async (movieId: number): Promise<IPaginatedResponse<IMovie>> => {
+    const { data } = await apiClient.get(`/movies/${movieId}/similar`);
     return data;
   },
 
-  getTvShowDetails: async (tvId: number) => {
-    const { data } = await tmdbApi.get(`/tv/${tvId}`, {
-      params: {
-        append_to_response: "credits,videos",
-      },
-    });
-    return data;
-  },
-
-  getSimilarTvShows: async (tvId: number) => {
-    const { data } = await tmdbApi.get(`/tv/${tvId}/similar`);
-    return data;
-  },
-  getTopRatedMovies: async (page = 1) => {
-    const { data } = await tmdbApi.get("/movie/top_rated", {
+  getTopRatedMovies: async (page = 1): Promise<IPaginatedResponse<IMovie>> => {
+    const { data } = await apiClient.get("/movies/top-rated", {
       params: { page },
     });
     return data;
   },
 
-  getNowPlayingMovies: async (page = 1) => {
-    const { data } = await tmdbApi.get("/movie/now_playing", {
+  getNowPlayingMovies: async (page = 1): Promise<IPaginatedResponse<IMovie>> => {
+    const { data } = await apiClient.get("/movies/now-playing", {
       params: { page },
     });
     return data;
   },
 
-  getUpcomingMovies: async (page = 1) => {
-    const { data } = await tmdbApi.get("/movie/upcoming", { params: { page } });
+  getUpcomingMovies: async (page = 1): Promise<IPaginatedResponse<IMovie>> => {
+    const { data } = await apiClient.get("/movies/upcoming", { params: { page } });
     return data;
   },
 
   getMovieVideos: async (movieId: number): Promise<{ results: IVideo[] }> => {
-    const { data } = await tmdbApi.get(`/movie/${movieId}/videos`);
+    const { data } = await apiClient.get(`/movies/${movieId}/videos`);
     return data;
   },
+
   discoverMovies: async ({
     page = 1,
     with_genres,
     sort_by = "popularity.desc",
     search,
   }: DiscoverParams): Promise<IPaginatedResponse<IMovie>> => {
-    const endpoint = search ? "/search/movie" : "/discover/movie";
-    const { data } = await tmdbApi.get(endpoint, {
+    const { data } = await apiClient.get("/movies/discover", {
       params: {
         page,
-        with_genres: with_genres || undefined,
+        with_genres,
         sort_by,
-        query: search,
+        search,
       },
     });
     return data;
   },
 };
 
-//tv show api calls
+// tv show api calls
 export const tvService = {
   getPopularTvShows: async (page = 1): Promise<IPaginatedResponse<ITVShow>> => {
-    const { data } = await tmdbApi.get("/tv/popular", { params: { page } });
+    const { data } = await apiClient.get("/tv/popular", { params: { page } });
     return data;
   },
 
-  getTopRatedTvShows: async (
-    page = 1
-  ): Promise<IPaginatedResponse<ITVShow>> => {
-    const { data } = await tmdbApi.get("/tv/top_rated", { params: { page } });
+  getTopRatedTvShows: async (page = 1): Promise<IPaginatedResponse<ITVShow>> => {
+    const { data } = await apiClient.get("/tv/top-rated", { params: { page } });
     return data;
   },
 
   getOnAirTvShows: async (page = 1): Promise<IPaginatedResponse<ITVShow>> => {
-    const { data } = await tmdbApi.get("/tv/on_the_air", { params: { page } });
+    const { data } = await apiClient.get("/tv/on-air", { params: { page } });
     return data;
   },
 
-  getUpcomingTvShows: async (
-    page = 1
-  ): Promise<IPaginatedResponse<ITVShow>> => {
-    const { data } = await tmdbApi.get("/tv/airing_today", {
+  getUpcomingTvShows: async (page = 1): Promise<IPaginatedResponse<ITVShow>> => {
+    const { data } = await apiClient.get("/tv/airing-today", {
       params: { page },
     });
     return data;
   },
 
   getTvGenres: async (): Promise<IGenre[]> => {
-    const { data } = await tmdbApi.get("/genre/tv/list");
-    return data.genres;
+    const { data } = await apiClient.get("/genres/tv");
+    return data;
   },
 
   getTvShowVideos: async (tvId: number): Promise<{ results: IVideo[] }> => {
-    const { data } = await tmdbApi.get(`/tv/${tvId}/videos`);
-    return data;
-  },
-  getTvShowDetails: async (tvId: number): Promise<TVShowDetails> => {
-    const { data } = await tmdbApi.get(`/tv/${tvId}`, {
-      params: {
-        append_to_response: "credits,videos",
-      },
-    });
+    const { data } = await apiClient.get(`/tv/${tvId}/videos`);
     return data;
   },
 
-  getSimilarTvShows: async (
-    tvId: number
-  ): Promise<IPaginatedResponse<ITVShow>> => {
-    const { data } = await tmdbApi.get(`/tv/${tvId}/similar`);
+  getTvShowDetails: async (tvId: number): Promise<TvShowDetailsInterface> => {
+    const { data } = await apiClient.get(`/tv/${tvId}`);
     return data;
   },
+
+  getSimilarTvShows: async (tvId: number): Promise<IPaginatedResponse<ITVShow>> => {
+    const { data } = await apiClient.get(`/tv/${tvId}/similar`);
+    return data;
+  },
+
   discoverTvShows: async ({
     page = 1,
     with_genres,
     sort_by = "popularity.desc",
     search,
   }: DiscoverParams): Promise<IPaginatedResponse<ITVShow>> => {
-    const endpoint = search ? "/search/tv" : "/discover/tv";
-    const { data } = await tmdbApi.get(endpoint, {
+    const { data } = await apiClient.get("/tv/discover", {
       params: {
         page,
-        with_genres: with_genres || undefined,
+        with_genres,
         sort_by,
-        query: search,
+        search,
       },
     });
     return data;
   },
+};
+
+// Extracted genre service to match backend structure
+export const genreService = {
+  getMovieGenres: async (): Promise<IGenre[]> => {
+    const { data } = await apiClient.get("/genres/movies");
+    return data;
+  },
+
+  getTvGenres: async (): Promise<IGenre[]> => {
+    const { data } = await apiClient.get("/genres/tv");
+    return data;
+  }
 };

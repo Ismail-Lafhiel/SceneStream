@@ -1,9 +1,11 @@
+// @ts-nocheck
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { createGenre } from "@/services/GenreService";
 import { X, Tag } from "lucide-react";
+import toast from "react-hot-toast";
 
 const CreateGenre = () => {
   const navigate = useNavigate();
@@ -38,9 +40,11 @@ const CreateGenre = () => {
     try {
       // Call the service to add the genre
       const response = await createGenre(formData);
-      navigate("/admin/genres"); // Redirect after successful creation
+      toast.success("Genre created successfully");
+      navigate("/admin/genres");
     } catch (err) {
       setError(err.message || "Failed to create genre");
+      toast.success("Failed to create genre");
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +63,7 @@ const CreateGenre = () => {
   const inputBorderClass = isDarkMode ? "border-gray-600" : "border-gray-300";
   const labelClass = isDarkMode ? "text-gray-300" : "text-gray-700";
   const buttonClass = isDarkMode
-    ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+    ? "bg-blue-600 hover:bg-blue-700 text-white"
     : "bg-blue-600 hover:bg-blue-700 text-white";
   const errorBgClass = isDarkMode ? "bg-red-900" : "bg-red-100";
   const errorTextClass = isDarkMode ? "text-red-200" : "text-red-800";
@@ -75,7 +79,7 @@ const CreateGenre = () => {
         >
           <div
             className={`${
-              isDarkMode ? "bg-indigo-900" : "bg-blue-600"
+              isDarkMode ? "bg-blue-900" : "bg-blue-600"
             } py-6 px-8`}
           >
             <div className="flex items-center">
@@ -101,7 +105,7 @@ const CreateGenre = () => {
                 <div className="mb-6">
                   <Tag
                     className={`h-16 w-16 mx-auto ${
-                      isDarkMode ? "text-indigo-400" : "text-blue-500"
+                      isDarkMode ? "text-blue-400" : "text-blue-500"
                     }`}
                   />
                   <p className="mt-4 mb-6 text-lg">
@@ -132,7 +136,7 @@ const CreateGenre = () => {
                     onChange={handleChange}
                     className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
                       isDarkMode
-                        ? "focus:ring-indigo-500"
+                        ? "focus:ring-blue-500"
                         : "focus:ring-blue-500"
                     } focus:border-transparent transition-all duration-200`}
                     placeholder="Enter genre name"

@@ -7,4 +7,5 @@ export * from "./paginatedResponse.interface";
 export * from "./discoverParams.interface";
 export * from "./user.interface";
 export * from "./bookmark.interface";
+export * from "./tvshowDetails.interface";
 

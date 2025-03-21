@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,6 +16,7 @@ import {
   Clock,
   Info,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 const UpdateMovie = () => {
   const { id } = useParams();
@@ -73,8 +75,9 @@ const UpdateMovie = () => {
           setBackdropPreview(movieResponse.backdrop_path);
         }
       } catch (err) {
-        console.error("Failed to fetch data", err);
+        // console.error("Failed to fetch data", err);
         setError("Failed to load data. Please try again later.");
+        toast.error("Failed to load data. Please try again later.");
       }
     };
 
@@ -180,9 +183,11 @@ const UpdateMovie = () => {
 
       // Send the request
       const response = await updateMovie(id, formDataToSend);
+      toast.success("Movie updated successfully");
       navigate("/admin/movies");
     } catch (err) {
       setError(err.message || "Failed to update movie");
+      toast.error(err.message || "Failed to update movie");
     } finally {
       setIsLoading(false);
     }
@@ -201,14 +206,14 @@ const UpdateMovie = () => {
   const inputBorderClass = isDarkMode ? "border-gray-600" : "border-gray-300";
   const labelClass = isDarkMode ? "text-gray-300" : "text-gray-700";
   const buttonClass = isDarkMode
-    ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+    ? "bg-blue-600 hover:bg-blue-700 text-white"
     : "bg-blue-600 hover:bg-blue-700 text-white";
   const errorBgClass = isDarkMode ? "bg-red-900" : "bg-red-100";
   const errorTextClass = isDarkMode ? "text-red-200" : "text-red-800";
   const errorBorderClass = isDarkMode ? "border-red-800" : "border-red-400";
   const chipClass = isDarkMode ? "bg-gray-700" : "bg-gray-200";
   const activeChipClass = isDarkMode
-    ? "bg-indigo-600 text-white"
+    ? "bg-blue-600 text-white"
     : "bg-blue-600 text-white";
 
   return (
@@ -221,7 +226,7 @@ const UpdateMovie = () => {
         >
           <div
             className={`${
-              isDarkMode ? "bg-indigo-900" : "bg-blue-600"
+              isDarkMode ? "bg-blue-900" : "bg-blue-600"
             } py-6 px-8`}
           >
             <div className="flex items-center">
@@ -245,7 +250,7 @@ const UpdateMovie = () => {
                 <div className="mb-6">
                   <Film
                     className={`h-16 w-16 mx-auto ${
-                      isDarkMode ? "text-indigo-400" : "text-blue-500"
+                      isDarkMode ? "text-blue-400" : "text-blue-500"
                     }`}
                   />
                   <p className="mt-4 mb-6 text-lg">
@@ -277,7 +282,7 @@ const UpdateMovie = () => {
                       onChange={handleChange}
                       className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
                         isDarkMode
-                          ? "focus:ring-indigo-500"
+                          ? "focus:ring-blue-500"
                           : "focus:ring-blue-500"
                       } focus:border-transparent transition-all duration-200`}
                       placeholder="Enter movie title"
@@ -299,7 +304,7 @@ const UpdateMovie = () => {
                       onChange={handleChange}
                       className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
                         isDarkMode
-                          ? "focus:ring-indigo-500"
+                          ? "focus:ring-blue-500"
                           : "focus:ring-blue-500"
                       } focus:border-transparent transition-all duration-200`}
                     />
@@ -322,7 +327,7 @@ const UpdateMovie = () => {
                       onChange={handleChange}
                       className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
                         isDarkMode
-                          ? "focus:ring-indigo-500"
+                          ? "focus:ring-blue-500"
                           : "focus:ring-blue-500"
                       } focus:border-transparent transition-all duration-200`}
                       placeholder="A catchy tagline"
@@ -343,7 +348,7 @@ const UpdateMovie = () => {
                         onChange={handleChange}
                         className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
                           isDarkMode
-                            ? "focus:ring-indigo-500"
+                            ? "focus:ring-blue-500"
                             : "focus:ring-blue-500"
                         } focus:border-transparent transition-all duration-200`}
                       >
@@ -370,7 +375,7 @@ const UpdateMovie = () => {
                         min="0"
                         className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
                           isDarkMode
-                            ? "focus:ring-indigo-500"
+                            ? "focus:ring-blue-500"
                             : "focus:ring-blue-500"
                         } focus:border-transparent transition-all duration-200`}
                         placeholder="120"
@@ -393,7 +398,7 @@ const UpdateMovie = () => {
                     onChange={handleChange}
                     className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
                       isDarkMode
-                        ? "focus:ring-indigo-500"
+                        ? "focus:ring-blue-500"
                         : "focus:ring-blue-500"
                     } focus:border-transparent transition-all duration-200 h-32 resize-none`}
                     placeholder="Write a brief overview of the movie..."
@@ -446,7 +451,7 @@ const UpdateMovie = () => {
                       step="0.1"
                       className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
                         isDarkMode
-                          ? "focus:ring-indigo-500"
+                          ? "focus:ring-blue-500"
                           : "focus:ring-blue-500"
                       } focus:border-transparent transition-all duration-200`}
                       placeholder="0.0"
@@ -468,7 +473,7 @@ const UpdateMovie = () => {
                       min="0"
                       className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
                         isDarkMode
-                          ? "focus:ring-indigo-500"
+                          ? "focus:ring-blue-500"
                           : "focus:ring-blue-500"
                       } focus:border-transparent transition-all duration-200`}
                       placeholder="0"

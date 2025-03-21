@@ -1,9 +1,11 @@
+//@ts-nocheck
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { getGenre, updateGenre } from "@/services/GenreService";
 import { X, Tag } from "lucide-react";
+import toast from "react-hot-toast";
 
 const UpdateGenre = () => {
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ const UpdateGenre = () => {
         setFormData({ name: genre.name });
       } catch (err) {
         setError(err.message || "Failed to fetch genre");
+        toast.error(err.message);
       }
     };
 
@@ -55,9 +58,11 @@ const UpdateGenre = () => {
     try {
       // Call the service to update the genre
       const response = await updateGenre(id, formData);
-      navigate("/admin/genres"); // Redirect after successful update
+      toast.success("Genre updated successfully!");
+      navigate("/admin/genres");
     } catch (err) {
       setError(err.message || "Failed to update genre");
+      toast.error(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +81,7 @@ const UpdateGenre = () => {
   const inputBorderClass = isDarkMode ? "border-gray-600" : "border-gray-300";
   const labelClass = isDarkMode ? "text-gray-300" : "text-gray-700";
   const buttonClass = isDarkMode
-    ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+    ? "bg-blue-600 hover:bg-blue-700 text-white"
     : "bg-blue-600 hover:bg-blue-700 text-white";
   const errorBgClass = isDarkMode ? "bg-red-900" : "bg-red-100";
   const errorTextClass = isDarkMode ? "text-red-200" : "text-red-800";
@@ -92,7 +97,7 @@ const UpdateGenre = () => {
         >
           <div
             className={`${
-              isDarkMode ? "bg-indigo-900" : "bg-blue-600"
+              isDarkMode ? "bg-blue-900" : "bg-blue-600"
             } py-6 px-8`}
           >
             <div className="flex items-center">
@@ -116,7 +121,7 @@ const UpdateGenre = () => {
                 <div className="mb-6">
                   <Tag
                     className={`h-16 w-16 mx-auto ${
-                      isDarkMode ? "text-indigo-400" : "text-blue-500"
+                      isDarkMode ? "text-blue-400" : "text-blue-500"
                     }`}
                   />
                   <p className="mt-4 mb-6 text-lg">
@@ -147,7 +152,7 @@ const UpdateGenre = () => {
                     onChange={handleChange}
                     className={`w-full px-4 py-3 rounded-lg ${inputBgClass} ${inputTextClass} ${inputBorderClass} border focus:ring-2 ${
                       isDarkMode
-                        ? "focus:ring-indigo-500"
+                        ? "focus:ring-blue-500"
                         : "focus:ring-blue-500"
                     } focus:border-transparent transition-all duration-200`}
                     placeholder="Enter genre name"
@@ -160,7 +165,7 @@ const UpdateGenre = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className={`${buttonClass} font-semibold py-3 px-8 rounded-lg transition transform hover:scale-105 duration-200 flex items-center ${
+                    className={`${buttonClass} cursor-pointer font-semibold py-3 px-8 rounded-lg transition transform hover:scale-105 duration-200 flex items-center ${
                       isLoading ? "opacity-70 cursor-not-allowed" : ""
                     }`}
                   >

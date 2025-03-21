@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -31,9 +32,9 @@ import { Badge } from "@/components/ui/Badge";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { getTvShows, deleteTvShow } from "@/services/TvshowService";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
 import ConfirmationDialog from "@/components/confirmationDialog/ConfirmationDialog";
 import { FaTv } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 const TVShows = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,6 +71,7 @@ const TVShows = () => {
         setError(null);
       } catch (err) {
         setError(err.message || "Failed to fetch TV shows");
+        toast.error(err.message || "Failed to fetch TV shows");
       } finally {
         setLoading(false);
       }

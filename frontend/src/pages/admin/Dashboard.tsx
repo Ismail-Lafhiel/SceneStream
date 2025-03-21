@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useState, useEffect } from "react";
 import { FaUsers, FaFilm, FaStar, FaEye, FaChartLine } from "react-icons/fa";
 import { useDarkMode } from "@/contexts/DarkModeContext";

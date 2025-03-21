@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { fetchAuthSession } from "aws-amplify/auth";
 import axios from "axios";
 

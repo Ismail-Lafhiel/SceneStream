@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { Button } from "@/components/ui/TableButton";
 

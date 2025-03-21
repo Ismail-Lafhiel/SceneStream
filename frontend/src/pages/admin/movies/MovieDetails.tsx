@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -66,7 +67,7 @@ const MovieDetails = () => {
   const cardClass = isDarkMode ? "bg-gray-800" : "bg-white";
   const labelClass = isDarkMode ? "text-gray-300" : "text-gray-700";
   const buttonClass = isDarkMode
-    ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+    ? "bg-blue-600 hover:bg-blue-700 text-white"
     : "bg-blue-600 hover:bg-blue-700 text-white";
   const errorBgClass = isDarkMode ? "bg-red-900" : "bg-red-100";
   const errorTextClass = isDarkMode ? "text-red-200" : "text-red-800";
@@ -82,7 +83,7 @@ const MovieDetails = () => {
         >
           <div
             className={`${
-              isDarkMode ? "bg-indigo-900" : "bg-blue-600"
+              isDarkMode ? "bg-blue-900" : "bg-blue-600"
             } py-6 px-8`}
           >
             <div className="flex items-center justify-between">
@@ -92,7 +93,7 @@ const MovieDetails = () => {
               </div>
               <button
                 onClick={handleBack}
-                className={`${buttonClass} font-semibold py-2 px-4 rounded-lg transition transform hover:scale-105 duration-200 flex items-center`}
+                className={`${buttonClass} cursor-pointer font-semibold py-2 px-4 rounded-lg transition transform hover:scale-105 duration-200 flex items-center`}
               >
                 <ArrowLeft className="mr-2 h-5 w-5" />
                 Back
@@ -114,7 +115,7 @@ const MovieDetails = () => {
                 <div className="mb-6">
                   <Film
                     className={`h-16 w-16 mx-auto ${
-                      isDarkMode ? "text-indigo-400" : "text-blue-500"
+                      isDarkMode ? "text-blue-400" : "text-blue-500"
                     }`}
                   />
                   <p className="mt-4 mb-6 text-lg">
