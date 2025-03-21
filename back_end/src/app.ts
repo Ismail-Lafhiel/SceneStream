@@ -29,6 +29,10 @@ userService
 // Routes
 app.use('/api', routes);
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+
 // Error handling
 app.use(errorHandler);
 

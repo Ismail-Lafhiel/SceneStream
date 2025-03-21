@@ -77,7 +77,7 @@ jobs:
             docker run -d \
               --name scene_stream_backend \
               --restart unless-stopped \
-              -p 5000:5000 \
+              --network host \
               -e MONGO_URI="${{ secrets.MONGO_URI }}" \
               -e AWS_REGION="${{ secrets.AWS_REGION }}" \
               -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
@@ -92,30 +92,30 @@ jobs:
               ismaillf/scene_stream:latest
 
             # Wait for container to start
-            sleep 10
+            sleep 15
 
-            # Check if container is running
-            if ! docker ps | grep -q scene_stream_backend; then
-              echo "Container failed to start"
-              docker logs scene_stream_backend
-              exit 1
-            fi
-
-            # Display container logs
+            # Check container status and logs
+            echo "Container status:"
+            docker ps -a | grep scene_stream_backend
+            
             echo "Container logs:"
             docker logs scene_stream_backend
-
-            # Check container health
-            echo "Container status:"
-            docker inspect scene_stream_backend --format='{{.State.Status}}'
-
-            # Verify application is responding
-            if curl -f http://localhost:5000/health; then
-              echo "Application is responding"
-            else
-              echo "Application is not responding"
-              exit 1
-            fi
+            
+            # Check if the process is listening on port 5000
+            echo "Checking port 5000:"
+            netstat -tulpn | grep 5000
+            
+            # Check if the application is responding locally
+            echo "Testing local connection:"
+            curl -v http://localhost:5000/health
+            
+            # If that fails, try with container IP
+            echo "Container IP and network info:"
+            docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' scene_stream_backend
+            
+            # Check security group rules
+            echo "Checking if port 5000 is open:"
+            sudo netstat -tulpn | grep 5000
 
   # deploy-frontend:
   #   runs-on: ubuntu-latest

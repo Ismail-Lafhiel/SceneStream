@@ -12,6 +12,8 @@ COPY . .
 
 RUN npm run build
 
+RUN apk add --no-cache netstat-nat curl
+
 EXPOSE 5000
 
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
