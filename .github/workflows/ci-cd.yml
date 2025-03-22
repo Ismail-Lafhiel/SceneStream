@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - SCEN-25-List-of-top-rated-movies
+      - main
 
 jobs:
   test-backend:
@@ -50,112 +50,36 @@ jobs:
         with:
           context: ./back_end
           push: true
-          tags: ismaillf/scene_stream:latest
+          tags: ismaillf/scene_stream:backend-latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1
+  build-and-deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            # Create app directory if it doesn't exist
-            mkdir -p ~/app
-            cd ~/app
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-            # Clean up old containers and images
-            docker stop scene_stream_backend || true
-            docker rm scene_stream_backend || true
-            docker system prune -f
+      # Create .env file for frontend build
+      - name: Setup Environment Variables
+        run: |
+          cd frontend
+          echo "VITE_APP_BACKEND_URL=${{ secrets.BACKEND_API_URL }}" > .env
 
-            # Pull latest image
-            docker pull ismaillf/scene_stream:latest
-
-            # Create and run new container
-            docker run -d \
-              --name scene_stream_backend \
-              --restart unless-stopped \
-              --network host \
-              -e MONGO_URI="${{ secrets.MONGO_URI }}" \
-              -e AWS_REGION="${{ secrets.AWS_REGION }}" \
-              -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
-              -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
-              -e AWS_S3_BUCKET_NAME="${{ secrets.AWS_S3_BUCKET_NAME }}" \
-              -e COGNITO_USER_POOL_ID="${{ secrets.COGNITO_USER_POOL_ID }}" \
-              -e COGNITO_CLIENT_ID="${{ secrets.COGNITO_CLIENT_ID }}" \
-              -e TMDB_API_KEY="${{ secrets.TMDB_API_KEY }}" \
-              -e TMDB_BASE_URL="${{ secrets.TMDB_BASE_URL }}" \
-              -e API_PORT="5000" \
-              -e NODE_ENV="production" \
-              ismaillf/scene_stream:latest
-
-            # Wait for container to start
-            sleep 15
-
-            # Check container status and logs
-            echo "Container status:"
-            docker ps -a | grep scene_stream_backend
-            
-            echo "Container logs:"
-            docker logs scene_stream_backend
-            
-            # Check if the process is listening on port 5000
-            echo "Checking port 5000:"
-            netstat -tulpn | grep 5000
-            
-            # Check if the application is responding locally
-            echo "Testing local connection:"
-            curl -v http://localhost:5000/health
-            
-            # If that fails, try with container IP
-            echo "Container IP and network info:"
-            docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' scene_stream_backend
-            
-            # Check security group rules
-            echo "Checking if port 5000 is open:"
-            sudo netstat -tulpn | grep 5000
-
-  # deploy-frontend:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     # Checkout the code
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-
-  #     # Install Vercel CLI
-  #     - name: Install Vercel CLI
-  #       run: npm install --global vercel@latest
-
-  #     # Setup Node.js
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: '20.x'
-  #         cache: 'npm'
-  #         cache-dependency-path: './frontend/package-lock.json'
-
-  #     # Install frontend dependencies
-  #     - name: Install frontend dependencies
-  #       run: |
-  #         cd frontend
-  #         npm ci
-
-  #     # Create .env file
-  #     - name: Setup Environment Variables
-  #       run: |
-  #         cd frontend
-  #         echo "VITE_APP_BACKEND_URL=${{ secrets.BACKEND_API_URL }}" > .env
-          
-  #     # Deploy to Vercel
-  #     - name: Deploy to Vercel
-  #       working-directory: ./frontend
-  #       env:
-  #         VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-  #         VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  #         VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  #       run: |
-  #         vercel pull --yes --environment=production --token=$VERCEL_TOKEN
-  #         vercel build --prod --token=$VERCEL_TOKEN
-  #         vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
+      - name: Build and push frontend Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          push: true
+          tags: ismaillf/scene_stream:frontend-latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
