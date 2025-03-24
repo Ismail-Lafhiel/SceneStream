@@ -69,7 +69,6 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      # Create .env file for frontend build
       - name: Setup Environment Variables
         run: |
           cd frontend

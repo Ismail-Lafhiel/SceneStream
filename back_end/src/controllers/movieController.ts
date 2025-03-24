@@ -47,7 +47,6 @@ export const addMovie = [
     try {
       const movieData = req.body;
 
-      // Convert genre_ids to an array of numbers
       if (Array.isArray(movieData.genre_ids)) {
         movieData.genre_ids = movieData.genre_ids.map(Number);
       } else {

@@ -17,7 +17,6 @@ const tvShowBookmarkSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-// Compound index to ensure a user can't bookmark the same TV show twice
 tvShowBookmarkSchema.index({ userId: 1, tvShowId: 1 }, { unique: true });
 
 export default mongoose.model<ITvShowBookmark>(

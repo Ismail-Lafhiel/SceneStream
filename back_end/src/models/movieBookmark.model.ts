@@ -16,7 +16,6 @@ const movieBookmarkSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-// Compound index to ensure a user can't bookmark the same movie twice
 movieBookmarkSchema.index({ userId: 1, movieId: 1 }, { unique: true });
 
 export default mongoose.model<IMovieBookmark>(

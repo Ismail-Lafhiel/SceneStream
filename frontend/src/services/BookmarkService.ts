@@ -16,10 +16,8 @@ export const createBookmark = async (
     const userId = getUserIdFromToken(token);
     if (!userId) throw new Error("User ID not found in token");
 
-    // Prepare the payload according to the backend expectations
     let payload = {
       type,
-      // Common fields
       id: data.id,
       poster_path: data.poster_path,
       backdrop_path: data.backdrop_path,
@@ -27,7 +25,6 @@ export const createBookmark = async (
       overview: data.overview,
     };
 
-    // Add type-specific fields
     if (type === "movie") {
       payload = {
         ...payload,
@@ -102,6 +99,6 @@ export const getUserBookmarks = async (token: string) => {
       console.error("Error status:", error.response.status);
       console.error("Error data:", error.response.data);
     }
-    return { data: [] }; // Return expected format
+    return { data: [] };
   }
 };
