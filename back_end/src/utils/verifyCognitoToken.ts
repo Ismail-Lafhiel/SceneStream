@@ -16,7 +16,6 @@ const accessTokenVerifier = CognitoJwtVerifier.create({
   clientId: config.aws.clientId,
 });
 
-// Define a type for errors with message property
 interface ErrorWithMessage {
   message: string;
 }
@@ -45,7 +44,6 @@ function getErrorMessage(error: unknown): string {
  */
 export const verifyCognitoToken = async (token: string) => {
   try {
-    // For security in production, avoid logging tokens even partially
     if (process.env.NODE_ENV !== "production") {
       const tokenSample = token.substring(0, 10) + "...";
       console.log(`Verifying token: ${tokenSample}`);
@@ -53,11 +51,9 @@ export const verifyCognitoToken = async (token: string) => {
 
     let payload;
     try {
-      // First try to verify as ID token
       payload = await verifier.verify(token);
       console.log("ID token verified successfully for user:", payload.sub);
     } catch (idTokenError) {
-      // If ID token verification fails, try as access token
       try {
         payload = await accessTokenVerifier.verify(token);
         console.log(

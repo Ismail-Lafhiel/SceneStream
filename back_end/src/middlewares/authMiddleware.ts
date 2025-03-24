@@ -2,11 +2,10 @@ import { Request, Response, NextFunction } from "express";
 import { AppError } from "../utils/errors";
 import { verifyCognitoToken } from "../utils/verifyCognitoToken";
 
-// Define a custom interface for the request with user
 interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
-    email: string | null; // Allow email to be null
+    email: string | null;
     groups: string[];
   };
 }
@@ -19,7 +18,7 @@ export const protect = async (
   res: Response,
   next: NextFunction
 ) => {
-  // 1) Get token and check if it exists
+  // Get token and check if it exists
   let token;
   if (
     req.headers.authorization &&
@@ -37,13 +36,13 @@ export const protect = async (
   }
 
   try {
-    // 2) Verify Cognito token
+    // Verify Cognito token
     const decoded = await verifyCognitoToken(token);
 
-    // 3) Attach user to request object with type safety
+    // Attach user to request object with type safety
     req.user = {
-      id: decoded.sub || "", // Ensure it's a string
-      email: decoded.email?.toString() || null, // Handle potential null/undefined email
+      id: decoded.sub || "",
+      email: decoded.email?.toString() || null,
       groups: Array.isArray(decoded["cognito:groups"]) ? decoded["cognito:groups"] : [],
     };
 

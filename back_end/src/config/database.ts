@@ -12,9 +12,9 @@ const connectDB = async () => {
   }
 
   const options = {
-    serverSelectionTimeoutMS: 30000,    // Timeout after 30 seconds
-    socketTimeoutMS: 45000,             // Close sockets after 45 seconds of inactivity
-    connectTimeoutMS: 30000,            // Give up initial connection after 30 seconds
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    connectTimeoutMS: 30000,
   };
 
   const connectWithRetry = async (retryCount = 0, maxRetries = 5) => {
@@ -25,18 +25,15 @@ const connectDB = async () => {
       return true;
     } catch (error) {
       if (retryCount < maxRetries) {
-        const retryDelay = Math.min(Math.pow(2, retryCount) * 1000, 30000); // Exponential backoff with max 30 sec
+        const retryDelay = Math.min(Math.pow(2, retryCount) * 1000, 30000);
         console.log(`MongoDB connection attempt failed. Retrying in ${retryDelay/1000} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
         console.error('Connection error:', error);
         
-        // Wait for the delay period
         await new Promise(resolve => setTimeout(resolve, retryDelay));
         
-        // Try again with incremented retry count
         return connectWithRetry(retryCount + 1, maxRetries);
       } else {
         console.error('MongoDB connection failed after maximum retry attempts:', error);
-        // Instead of exiting, return false to allow application to handle this gracefully
         return false;
       }
     }

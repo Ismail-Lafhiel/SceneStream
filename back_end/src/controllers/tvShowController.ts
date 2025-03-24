@@ -44,7 +44,6 @@ export const addTVShow = [
     try {
       const tvShowData = req.body;
 
-      // Convert genre_ids to an array of numbers
       if (Array.isArray(tvShowData.genre_ids)) {
         tvShowData.genre_ids = tvShowData.genre_ids.map(Number);
       } else {

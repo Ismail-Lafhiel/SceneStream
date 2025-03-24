@@ -37,12 +37,11 @@ export const movieService = {
       const lastMovie = await Movie.findOne().sort({ id: -1 });
       const newId = lastMovie ? lastMovie.id + 1 : 1;
 
-      // Ensure genre_ids is an array of numbers
       const genreIds = Array.isArray(movieData.genre_ids)
         ? movieData.genre_ids
         : [];
 
-      // Find corresponding ObjectIds in the database
+      // Find ObjectIds in the database
       const genreDocuments = await Genre.find({ id: { $in: genreIds } });
       const genreObjectIds = genreDocuments.map((genre) => genre._id);
 
