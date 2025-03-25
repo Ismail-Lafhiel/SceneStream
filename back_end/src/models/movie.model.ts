@@ -14,6 +14,7 @@ const MovieSchema: Schema = new Schema({
   runtime: { type: Number },
   status: { type: String },
   tagline: { type: String },
+  numberOfViews: {type: Number, default: 0},
   credits: {
     cast: [
       {

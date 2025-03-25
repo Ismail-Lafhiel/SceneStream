@@ -27,6 +27,15 @@ export const movieService = {
   // Fetch a movie by id from the database
   getMovieById: async (id: number): Promise<IMovie | null> => {
     const movie = await Movie.findOne({ id }).populate("genre_ids");
+
+    try {
+      if (movie && movie?.numberOfViews >= 0) {
+        movie.numberOfViews += 1;
+        movie.save();
+      }
+    } catch (error) {
+      console.log(error);
+    }
     return movie;
   },
 

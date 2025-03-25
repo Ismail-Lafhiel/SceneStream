@@ -14,6 +14,7 @@ export interface IMovie {
   runtime?: number;
   status?: string;
   tagline?: string;
+  numberOfViews: number;
   credits?: {
     cast: {
       id: number;
