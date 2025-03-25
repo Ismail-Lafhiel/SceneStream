@@ -1,4 +1,3 @@
-// src/routes/publicRoutes.tsx
 import { RouteObject } from "react-router-dom";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";

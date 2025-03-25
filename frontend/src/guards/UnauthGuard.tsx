@@ -1,4 +1,3 @@
-// src/guards/UnauthGuard.tsx
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
