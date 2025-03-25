@@ -332,6 +332,14 @@ Movies/tvshows rating web app using React.js, Express.js and TMDB api.
 
 ```
 
+## Jira:
+
+[click here](https://lafhielismailcontact.atlassian.net/jira/software/projects/SCEN/boards/203/timeline)
+
+## Presentation Link:
+
+[click here]([https://lafhielismailcontact.atlassian.net/jira/software/projects/SCEN/boards/203/timeline](https://www.canva.com/design/DAGiXkBxTgA/c33cvCu7PbwZfVXuIiJWrw/edit?utm_content=DAGiXkBxTgA&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton))
+
 🛑🛑🛑 BEFORE EVEYTHING 🛑🛑🛑
 
 Make sure Node.js is installed and configured
