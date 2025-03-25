@@ -340,7 +340,9 @@ Movies/tvshows rating web app using React.js, Express.js and TMDB api.
 
 [click here](https://www.canva.com/design/DAGiXkBxTgA/c33cvCu7PbwZfVXuIiJWrw/edit?utm_content=DAGiXkBxTgA&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 
-🛑🛑🛑 BEFORE EVEYTHING 🛑🛑🛑
+
+# 🛑🛑🛑 BEFORE EVEYTHING 🛑🛑🛑
+
 
 Make sure Node.js is installed and configured
 
@@ -366,4 +368,4 @@ npm install
 npm run dev
 ```
 
-✔✔ Repeat the file process for the frontend ✔✔
+✔✔ Repeat the same process for the frontend ✔✔
